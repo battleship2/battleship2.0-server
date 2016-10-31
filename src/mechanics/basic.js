@@ -1,4 +1,4 @@
-Mechanic = {
+var Mechanic = {
 
     isDispositionValid: function (map, ships) {
         return Mechanic._mapDimensionsAreValid(map) &&
