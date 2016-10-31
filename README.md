@@ -15,3 +15,17 @@ To launch all the tests, type the following command:
 
 ## Test on browser
 in a browser, open the page ./www/index.html to launch a 4 players game
+
+## Docker
+to build/re-build the image, from the root of the project, type the following command:  
+```shell
+$ sudo docker build -t battleship2.0 .
+```
+
+to run a container
+```shell
+$ sudo docker run -d \
+       --name <a name> \
+       -p <any port>:9001 \
+       battleship2.0:latest
+```
