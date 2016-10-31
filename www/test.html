@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <script src="https://cdn.socket.io/socket.io-1.4.8.js"></script>
+    <style>
+
+        h1 {
+            font-size: 15px;
+        }
+
+        #messages {
+            width: 100%;
+        }
+
+        #messages > div {
+            border-bottom: 1px solid #BBB;
+            font-size: 10px;
+            color: black;
+        }
+
+        #messages > div.new_player {
+            font-weight: bold;
+            color: cadetblue;
+        }
+        #messages > div.success {
+            color: darkgreen;
+        }
+        #messages > div.failure {
+            color: darkred;
+        }
+
+        #clear {
+            position: fixed;
+            top: 2px;
+            right: 2px;
+            width: 16px;
+            height: 16px;
+            padding: 0;
+        }
+
+        #clear > img {
+            opacity: 0.5;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #clear > img:hover {
+            opacity: 1;
+        }
+
+        textarea {
+            width: 100%;
+            font-size: 12px;
+            font-family: "Droid Sans Mono";
+        }
+
+    </style>
+</head>
+<body>
+<h1>toto</h1>
+<div id="clear">
+    <img src="img/clear.png">
+</div>
+<div id="messages"></div>
+<div id="actions"></div>
+<script>
+
+    var socket = io('http://localhost:9001');
+    socket.on('nickname', function (nickname) {
+        socket.nickname = nickname;
+        document.querySelector('h1').textContent = nickname;
+        window.setTimeout(function () {
+            socket.emit('list games');
+        }, Math.random() * 3000);
+    });
+
+    socket.on('list games', function (lists) {
+        if (lists.length === 0) {
+            var game = {
+                name: 'toto',
+                maxPlayers: 4
+            };
+            socket.emit('create game', game);
+        } else {
+            socket.emit('join game', {gameId: lists[0].id});
+        }
+    });
+
+    socket.on('game created', function () {
+        var message = document.createElement('div');
+        message.textContent = 'I created the game';
+        message.classList.add('creator');
+        document.getElementById('messages').appendChild(message);
+    });
+
+    socket.on('new player', function (player) {
+        var message = document.createElement('div');
+        message.textContent = player.nickname + ' has join the game';
+        message.classList.add('new_player');
+        document.getElementById('messages').appendChild(message);
+    });
+
+    socket.on('game state', function (data) {
+        switch (data.state) {
+            case 'ready':
+                setReady();
+                break;
+            case 'place ship':
+                placeShips(data.ships);
+                break;
+            case 'new turn':
+                setTurn();
+                break;
+            case 'stopped':
+                console.log('end');
+                break;
+        }
+    });
+
+    socket.on('player ready', function (data) {
+        var message = document.createElement('div');
+        if (data.isReady) {
+            message.textContent = 'player ' + data.nickname + ' is ready!';
+            message.classList.add('success');
+        } else {
+            message.textContent = 'player ' + data.nickname + ' is not ready.';
+            message.classList.add('failure');
+        }
+        document.getElementById('messages').appendChild(message);
+    });
+
+    var setReady = function () {
+        var message = document.createElement('div');
+        message.textContent = 'The game will start soon';
+        document.getElementById('messages').appendChild(message);
+
+        var button = document.createElement('button');
+        button.textContent = 'ready';
+        document.getElementById('actions').innerHTML = '';
+        document.getElementById('actions').appendChild(button);
+
+        var ready = false;
+        button.addEventListener('click', function () {
+            ready = !ready;
+            socket.emit('ready', ready);
+        });
+    };
+
+    var placeShips = function (ships) {
+        var message = document.createElement('div');
+        message.textContent = 'Place your ships!';
+        document.getElementById('messages').appendChild(message);
+
+        var disposition = [{
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 5,
+            type: 'destroyer'
+        }];
+        socket.emit('place ships', disposition);
+//        var text = document.createElement('textarea');
+//        text.textContent = JSON.stringify(disposition);
+//        var button = document.createElement('button');
+//        button.textContent = 'send';
+//        document.getElementById('actions').innerHTML = '';
+//        document.getElementById('actions').appendChild(text);
+//        document.getElementById('actions').appendChild(button);
+//
+//        button.addEventListener('click', function () {
+//            try {
+//                var json = JSON.parse(text.value);
+//                socket.emit('place ships', json);
+//            } catch (e) {
+//                console.log(e);
+//            }
+//        });
+    };
+
+    var setTurn = function () {
+        var message = document.createElement('div');
+        message.textContent = 'Play your turn';
+        document.getElementById('messages').appendChild(message);
+
+        var text = document.createElement('input');
+        var action = [{
+            type: 'bomb',
+            x: 0,
+            y: 0
+        }];
+        text.type = 'text';
+        text.value = JSON.stringify(action);
+        var button = document.createElement('button');
+        button.textContent = 'send';
+        document.getElementById('actions').innerHTML = '';
+        document.getElementById('actions').appendChild(text);
+        document.getElementById('actions').appendChild(button);
+
+        button.addEventListener('click', function () {
+            try {
+                var json = JSON.parse(text.value);
+                socket.emit('play turn', json);
+            } catch (e) {
+                console.log(e);
+            }
+        });
+    };
+
+    socket.on('ship placement', function (result) {
+        var message = document.createElement('div');
+        if (result.error) {
+            message.textContent = result.error;
+            message.classList.add('failure');
+        } else {
+            message.textContent = 'Ships placed!';
+            message.classList.add('success');
+        }
+        document.getElementById('messages').appendChild(message);
+    });
+
+    socket.on('play turn', function (result) {
+        var message = document.createElement('div');
+        if (result.error) {
+            message.textContent = result.error;
+            message.classList.add('failure');
+        } else {
+            message.textContent = 'Turn played!';
+            message.classList.add('success');
+        }
+        document.getElementById('messages').appendChild(message);
+    });
+
+    socket.on('players', function (players) {
+        for (var i = 0; i < players.length; ++i) {
+            var player = players[i];
+            console.log(player);
+        }
+    });
+
+    socket.on('turn results', function (results) {
+        console.log(results);
+    });
+
+    document.querySelector('#clear > img').addEventListener('click', function () {
+        document.getElementById('messages').textContent = '';
+    });
+
+
+</script>
+</body>
+</html>

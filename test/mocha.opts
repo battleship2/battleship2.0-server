@@ -1,0 +1,4 @@
+--recursive
+--require chai
+--ui bdd
+-R dot
