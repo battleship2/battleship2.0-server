@@ -1,4 +1,5 @@
-# Websocket
+# Battleship-2.0 (server)
+The client repo is [here](https://github.com/battleship2/battleship2.0-client)
 
 ## Launch
 
