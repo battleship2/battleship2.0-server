@@ -165,7 +165,7 @@ Game.prototype = {
 
         return {
             actions: actions,
-            turnScore: scores,
+            turnScores: scores,
             players: this.getPlayersInfos()
         };
     },
@@ -222,7 +222,7 @@ Game.prototype = {
             if (scores[owner] === undefined) {
                 scores[owner] = {
                     score: 0,
-                    missed: 0
+                    miss: 0
                 }
             }
             var missed = true;
@@ -233,7 +233,7 @@ Game.prototype = {
                     scores[owner].score += 1;
                 }
             }
-            scores[owner].missed += missed ? 1 : 0;
+            scores[owner].miss += missed ? 1 : 0;
         }
         return scores;
     },
@@ -261,10 +261,9 @@ Game.prototype = {
                     }
                     if (!alreadyRegistered) {
                         ship.hits.push(result.localHit);
-                    }
-
-                    if (ship.hits.length === ship.width * ship.height) {
-                        ship.destroyed = true;
+                        if (ship.hits.length === ship.width * ship.height) {
+                            ship.destroyed = true;
+                        }
                     }
                 }
             }

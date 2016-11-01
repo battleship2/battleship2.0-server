@@ -75,11 +75,8 @@ var Mechanic = {
             return false;
         }
         if (ship.hits && ship.hits.length) {
-            for (var hit in ship.hits) {
-                if (!ship.hits.hasOwnProperty(hit)) {
-                    continue;
-                }
-                if (ship.hits[hit].x === bomb.x && ship.hits[hit].y === bomb.y) {
+            for (var i = 0; i < ship.hits.length; ++i) {
+                if (ship.hits[i].x + ship.x === bomb.x && ship.hits[i].y + ship.y === bomb.y) {
                     return false;
                 }
             }
