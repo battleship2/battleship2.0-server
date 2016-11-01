@@ -1,0 +1,14 @@
+{
+    "hooks": {
+        ".js": {
+            "debugEnabled": {
+                "pattern": "true /\\*__debugEnabled__\\*/",
+                "environments": {
+                    "dev": true,
+                    "staging": false,
+                    "prod": false
+                }
+            }
+        }
+    }
+}
