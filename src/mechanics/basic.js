@@ -15,33 +15,38 @@ var Mechanic = {
     },
 
     processTurn: function (playersActions, map) {
-
-        var results = {
-            hits: [],
-            scores: {}
-        };
+        var actionsResults = [];
         for (var player in playersActions) {
             if (!playersActions.hasOwnProperty(player)) {
                 continue;
             }
-            results.scores[player] = 0;
-            playersActions[player].forEach(function(action) {
-                Mechanic._processAction(results, player, action, map.boards);
+            playersActions[player].forEach(function(playerAction) {
+                var actionResult = Mechanic._processAction(player, playerAction, map.boards);
+                actionsResults.push(actionResult);
             });
         }
-
-        return results
+        return actionsResults;
     },
 
-    _processAction: function (results, player, action, boards) {
-        switch (action.type) {
+    _processAction: function (nickname, playerAction, boards) {
+        var action = {
+            x: playerAction.x,
+            y: playerAction.y,
+            id: playerAction.id,
+            type: playerAction.type,
+            owner: nickname,
+            result: []
+        };
+        switch (playerAction.type) {
             case 'bomb':
-                Mechanic._processBomb(results, player, action, boards);
+                action.result = Mechanic._processBomb(nickname, playerAction, boards);
                 break;
         }
+        return action;
     },
 
-    _processBomb: function (results, player, bomb, boards) {
+    _processBomb: function (player, bomb, boards) {
+        var result = [];
         for (var p in boards) {
             if (!boards.hasOwnProperty(p) || p === player) {
                 continue;
@@ -50,22 +55,26 @@ var Mechanic = {
                 if (!boards[p].ships.hasOwnProperty(shipId)) {
                     continue;
                 }
-                var hit = Mechanic._colliding(bomb, boards[p].ships[shipId]);
+                var ship = boards[p].ships[shipId];
+                var hit = Mechanic._colliding(bomb, ship);
                 if (hit) {
-                    results.scores[player] += 1;
-                    results.hits.push({
-                        x: bomb.x,
-                        y: bomb.y,
-                        owner: player,
-                        ship: {
-                            owner: p,
-                            id: shipId,
-                            localHit: hit
-                        }
+                    result.push({
+                        type: 'hit ship',
+                        owner: p,
+                        target: ship.id,
+                        localHit: hit
                     });
+
+                    if (ship.width * ship.height === ship.hits.length + 1) {
+                        result.push({
+                            type: 'ship sank',
+                            owner: p
+                        });
+                    }
                 }
             }
         }
+        return result;
     },
 
     _colliding: function (bomb, ship) {

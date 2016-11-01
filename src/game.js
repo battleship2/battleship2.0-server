@@ -17,7 +17,6 @@ function Game (id, name, maxPlayers, password) {
     };
     this.actions = {};
     this.history = [];
-    this.shipCounter = 0;
 
     this.state = Game.STATE.WAITING_PLAYERS;
     this.mechanic = require('./mechanics/basic');
@@ -106,9 +105,8 @@ Game.prototype = {
             }
             this.map.boards[player.nickname].ships = {};
             for (var s = 0; s < ships.length; ++s) {
-                this.shipCounter++;
                 var ship = ships[s];
-                ship.id = player.nickname + '-' + this.shipCounter;
+                ship.id = player.nickname + '-ship-' + s;
                 ship.hits = [];
                 this.map.boards[player.nickname].ships[ship.id] = ship;
             }
@@ -131,7 +129,14 @@ Game.prototype = {
 
     setNextActions: function (player, actions) {
         if (this.mechanic.isActionsValid(this.map, actions)) {
-            this.actions[player.nickname] = actions;
+            var nickname = player.nickname;
+            this.actions[nickname] = [];
+
+            for (var i = 0; i < actions.length; ++i) {
+                actions[i].id = nickname + '-action-' + i;
+                actions[i].owner = nickname;
+                this.actions[nickname].push(actions[i]);
+            }
             return true;
         }
         return false;
@@ -150,20 +155,18 @@ Game.prototype = {
     },
 
     playTheTurn: function () {
-        var result = {
-            actions: [],
-            turnScores: [],
-            players: [],
-            events: []
-        };
-        var rawResult = this.mechanic.processTurn(result, this.actions, this.map);
-        this._updateBoards(result, rawResult);
-        this._updatePlayerInfos(result, rawResult);
+        var actions = this.mechanic.processTurn(this.actions, this.map);
+        var scores = this._getTurnScores(actions);
+
+        this._updateBoards(actions);
         this.history.push(JSON.parse(JSON.stringify(this.actions)));
         this.actions = {};
 
-        result.players = this.getPlayersInfos();
-        return result;
+        return {
+            actions: actions,
+            turnScore: scores,
+            players: this.getPlayersInfos()
+        };
     },
 
     getPlayersList: function () {
@@ -210,27 +213,56 @@ Game.prototype = {
         }
     },
 
-    _updateBoards: function(result, rawResult) {
-        result.events = [];
-        var hits = rawResult.hits;
-        for (var h = 0; h < hits.length; ++h) {
-            var hit = hits[h];
-            var info = hit.ship;
-            var ship = this.map.boards[info.owner].ships[info.id];
-            var previousHits = ship.hits;
-            var alreadyRegistered = false;
-            for (var i = 0; i < previousHits.length; ++i) {
-                if (previousHits[i].x === info.localHit.x && previousHits[i].y === info.localHit.y) {
-                    alreadyRegistered = true;
-                    break;
+    _getTurnScores: function (actions) {
+        var scores = {};
+        for (var i = 0; i < actions.length; ++i) {
+            var action = actions[i];
+            var owner = action.owner;
+            if (scores[owner] === undefined) {
+                scores[owner] = {
+                    score: 0,
+                    missed: 0
                 }
             }
-            if (!alreadyRegistered) {
-                ship.hits.push(info.localHit);
+            var missed = true;
+            for (var j = 0; j < action.result.length; ++j) {
+                var result = action.result[j];
+                if (result.type === 'ship hit') {
+                    missed = false;
+                    scores[owner].score += 1;
+                }
             }
+            scores[owner].missed += missed ? 1 : 0;
+        }
+        return scores;
+    },
 
-            if (previousHits.length > ship.width * ship.height) {
-                ship.destroyed = true;
+    _updateBoards: function (actions) {
+        for (var i = 0; i < actions.length; ++i) {
+            var action = actions[i];
+            if (action.result.length === 0) {
+                continue;
+            }
+            for (var j = 0; j < action.result.length; ++j) {
+                var result = action.result[j];
+
+                if (result.type === 'hit ship') {
+                    var owner = result.owner;
+                    var target = result.target;
+                    var ship = this.map.boards[owner].ships[target];
+                    var previousHits = ship.hits;
+                    var alreadyRegistered = false;
+
+                    for (var x = 0; x < previousHits.length; ++x) {
+                        if (previousHits[x].x === result.localHit.x && previousHits[x].y === result.localHit.y) {
+                            alreadyRegistered = true;
+                            break;
+                        }
+                    }
+                    if (!alreadyRegistered) {
+                        ship.hits.push(result.localHit);
+                    }
+                }
             }
         }
     },
