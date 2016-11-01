@@ -64,13 +64,6 @@ var Mechanic = {
                         target: ship.id,
                         localHit: hit
                     });
-
-                    if (ship.width * ship.height === ship.hits.length + 1) {
-                        result.push({
-                            type: 'ship sank',
-                            owner: p
-                        });
-                    }
                 }
             }
         }

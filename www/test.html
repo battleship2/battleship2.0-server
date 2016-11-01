@@ -68,6 +68,11 @@
 <script>
 
     var socket = io('http://localhost:9001');
+
+    function getCoords(point) {
+        return String.fromCharCode(point.x + 65) + (point.y + 1);
+    }
+
     socket.on('nickname', function (nickname) {
         socket.nickname = nickname;
         document.querySelector('h1').textContent = nickname;
@@ -240,7 +245,12 @@
     });
 
     socket.on('turn results', function (results) {
-        console.log(results);
+        for (var i = 0; i < results.actions.length; ++i) {
+            var message = document.createElement('div');
+            var action = results.actions[i];
+            message.textContent = action.owner + ' plays ' + action.type + '@' + getCoords(action);
+            document.getElementById('messages').appendChild(message);
+        }
     });
 
     document.querySelector('#clear > img').addEventListener('click', function () {

@@ -159,6 +159,7 @@ Game.prototype = {
         var scores = this._getTurnScores(actions);
 
         this._updateBoards(actions);
+        this._updatePlayersInfos(scores);
         this.history.push(JSON.parse(JSON.stringify(this.actions)));
         this.actions = {};
 
@@ -227,7 +228,7 @@ Game.prototype = {
             var missed = true;
             for (var j = 0; j < action.result.length; ++j) {
                 var result = action.result[j];
-                if (result.type === 'ship hit') {
+                if (result.type === 'hit ship') {
                     missed = false;
                     scores[owner].score += 1;
                 }
@@ -245,7 +246,6 @@ Game.prototype = {
             }
             for (var j = 0; j < action.result.length; ++j) {
                 var result = action.result[j];
-
                 if (result.type === 'hit ship') {
                     var owner = result.owner;
                     var target = result.target;
@@ -262,29 +262,21 @@ Game.prototype = {
                     if (!alreadyRegistered) {
                         ship.hits.push(result.localHit);
                     }
+
+                    if (ship.hits.length === ship.width * ship.height) {
+                        ship.destroyed = true;
+                    }
                 }
             }
         }
     },
 
-    _updatePlayerInfos: function (result, rawResult) {
-        result.turnScores = [];
-        var hits = rawResult.hits;
-        var tmp = {};
-        for (var h = 0; h < hits.length; ++h) {
-            var owner = hits[h].owner;
-            if (tmp[owner]) {
-                tmp[owner] = { score : 1 };
-            } else {
-                tmp[owner].score += 1;
+    _updatePlayersInfos: function (scores) {
+        for (var player in scores) {
+            if (!scores.hasOwnProperty(player)) {
+                continue;
             }
-            this.players[owner].score += 1;
-        }
-        for (var player in tmp) {
-            result.turnScores.push({
-                nickname: player,
-                score: tmp[player].score
-            });
+            this.players[player].score += scores[player].score;
         }
     },
 
