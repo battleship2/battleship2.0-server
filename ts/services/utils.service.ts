@@ -1,4 +1,4 @@
-/// <reference path="../server.ts" />
+/// <reference path="../definitions/definitions.d.ts" />
 
 let _instance: Utils = null;
 
@@ -40,12 +40,7 @@ class Utils {
      * @returns {String} The UUID.
      */
     public uuid = (): string => {
-        var time = new Date().getTime();
-
-        if (this.isDefined(window.performance) && this.isFunction(window.performance.now)) {
-            // use high-precision timer if available
-            time += window.performance.now();
-        }
+        var time = new Date().getTime() + process.hrtime()[0];
 
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char: string) => {
             var r = (time + Math.random() * 16) % 16 | 0;
@@ -257,7 +252,7 @@ class Utils {
      * by passing an empty object as the target: `var object = extend({}, object1, object2)`.
      *
      * **Note:** Keep in mind that `extend` does not support recursive merge (deep copy). Use
-     * {@link merge} for this.
+     * {@link merge} for _instance.
      *
      * @param {Object} dst Destination object.
      * @param {...Object} sources Source object(s).
@@ -317,7 +312,7 @@ class Utils {
 
         if (obj) {
 
-            if (this.isFunction(obj)) {
+            if (_instance.isFunction(obj)) {
 
                 for (key in obj) {
                     if (key !== 'prototype' && key !== 'length' && key !== 'name' && obj.hasOwnProperty(key)) {
@@ -325,7 +320,7 @@ class Utils {
                     }
                 }
 
-            } else if (this.isArray(obj) || _isArrayLike(obj)) {
+            } else if (_instance.isArray(obj) || _isArrayLike(obj)) {
 
                 var isPrimitive = typeof obj !== 'object';
                 for (key = 0, length = obj.length; key < length; key++) {
@@ -334,7 +329,7 @@ class Utils {
                     }
                 }
 
-            } else if (obj.forEach && obj.forEach !== this.forEach) {
+            } else if (obj.forEach && obj.forEach !== _instance.forEach) {
 
                 obj.forEach(iterator, context, obj);
 
@@ -391,7 +386,7 @@ function _baseExtend(dst: Object, objs: any, deep: boolean): Object {
 
         var obj = objs[i];
 
-        if (!this.isObject(obj) && !this.isFunction(obj)) continue;
+        if (!_instance.isObject(obj) && !_instance.isFunction(obj)) continue;
 
         var keys = Object.keys(obj);
 
@@ -400,18 +395,18 @@ function _baseExtend(dst: Object, objs: any, deep: boolean): Object {
             var key = keys[j];
             var src = obj[key];
 
-            if (deep && this.isObject(src)) {
+            if (deep && _instance.isObject(src)) {
 
-                if (this.isDate(src)) {
+                if (_instance.isDate(src)) {
                     dst[key] = new Date(src.valueOf());
-                } else if (this.isRegExp(src)) {
+                } else if (_instance.isRegExp(src)) {
                     dst[key] = new RegExp(src);
                 } else if (src.nodeName) {
                     dst[key] = src.cloneNode(true);
-                } else if (this.isElement(src)) {
+                } else if (_instance.isElement(src)) {
                     dst[key] = src.clone();
                 } else {
-                    if (!this.isObject(dst[key])) dst[key] = this.isArray(src) ? [] : {};
+                    if (!_instance.isObject(dst[key])) dst[key] = _instance.isArray(src) ? [] : {};
                     _baseExtend(dst[key], [src], true);
                 }
 
@@ -445,7 +440,7 @@ function _isArrayLike(obj: any): boolean {
     // * jqLite is either the jQuery or jqLite constructor function
     // * we have to check the existence of jqLite first as this method is called
     //   via the forEach method when constructing the jqLite object in the first place
-    if (this.isArray(obj) || this.isString(obj)) return true;
+    if (_instance.isArray(obj) || _instance.isString(obj)) return true;
 
     // Support: iOS 8.2 (not reproducible in simulator)
     // "length" in obj used to prevent JIT error (gh-11508)
@@ -453,7 +448,7 @@ function _isArrayLike(obj: any): boolean {
 
     // NodeList objects (with `item` method) and
     // other objects with suitable length characteristics are array-like
-    return this.isNumber(length) &&
+    return _instance.isNumber(length) &&
         (length >= 0 && ((length - 1) in obj || obj instanceof Array) || typeof obj.item === 'function');
 
 }

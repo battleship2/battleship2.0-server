@@ -1,6 +1,6 @@
 var expect = require('chai').expect,
     sinon = require('sinon'),
-    Game = require('../../src/game');
+    Game = require('../../src/release/classes/game.class');
 
 describe('game', function () {
     var mockPlayer,
@@ -89,7 +89,7 @@ describe('game', function () {
             mockPlayer.join = sinon.spy();
             mockPlayer.leave = sinon.spy();
             game.addPlayer(mockPlayer);
-            var result = mockPlayer.join.calledWith(game.socket_room_name);
+            var result = mockPlayer.join.calledWith(game.socketRoomName);
             expect(result).to.be.true;
             result = mockPlayer.leave.calledWith('lobby');
             expect(result).to.be.true;
@@ -144,7 +144,7 @@ describe('game', function () {
             game.removePlayer(mockPlayer);
             var result = mockPlayer.join.calledWith('lobby');
             expect(result).to.be.true;
-            result = mockPlayer.leave.calledWith(game.socket_room_name);
+            result = mockPlayer.leave.calledWith(game.socketRoomName);
             expect(result).to.be.true;
         });
 

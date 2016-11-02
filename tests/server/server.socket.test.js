@@ -1,6 +1,6 @@
 var expect = require('chai').expect,
     restify = require('restify'),
-    socket = require('../../src/socket.js'),
+    socket = require('../../src/release/classes/socket.class'),
     io = require('socket.io'),
     ioClient = require('socket.io-client');
 

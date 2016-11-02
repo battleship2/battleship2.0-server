@@ -1,4 +1,4 @@
-/// <reference path="../server.ts" />
+/// <reference path="../definitions/definitions.d.ts" />
 
 import Utils = require('../services/utils.service');
 
@@ -88,7 +88,7 @@ class Nickname {
     /**********************************************************************************/
 
     public get = (): string => {
-        return _pickRandomWordin(_words.adjectives) + ' ' + _pickRandomWordin(_words.nouns);
+        return _pickRandomWordIn(_words.adjectives) + ' ' + _pickRandomWordIn(_words.nouns);
     };
 
 }
@@ -100,7 +100,7 @@ class Nickname {
 /*                                                                                */
 /**********************************************************************************/
 
-function _pickRandomWordin(words: Array<string>): string {
+function _pickRandomWordIn(words: Array<string>): string {
     return words[Math.floor(Math.random() * words.length)];
 }
 

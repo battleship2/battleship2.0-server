@@ -67,7 +67,46 @@
 <div id="actions"></div>
 <script>
 
-    var socket = io('http://localhost:9001');
+    function uuid() {
+        var time = new Date().getTime();
+
+        if (window.performance && window.performance.now) {
+            // use high-precision timer if available
+            time += window.performance.now();
+        }
+
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (char) {
+            var r = (time + Math.random() * 16) % 16 | 0;
+            time = Math.floor(time / 16);
+            return (char === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+    }
+
+    var UUID = uuid(),
+        socket = io('http://localhost:9001');
+
+    var _emit = socket.emit.bind(socket);
+    socket.emit = function (event, data) {
+        if (data === void 0) {
+            console.log('[' + UUID + '] socket.emit:', event);
+            return _emit(event);
+        }
+        console.log('[' + UUID + '] socket.emit:', event, data);
+        _emit(event, data);
+    };
+
+    var _on = socket.on.bind(socket);
+    socket.on = function (event, cb) {
+        _on(event, function (data) {
+            console.info('[' + UUID + '] socket.on:', event, data);
+            cb(data);
+        });
+    };
+
+    function getCoords(point) {
+        return String.fromCharCode(point.x + 65) + (point.y + 1);
+    }
+
     socket.on('nickname', function (nickname) {
         socket.nickname = nickname;
         document.querySelector('h1').textContent = nickname;
@@ -80,7 +119,7 @@
         if (lists.length === 0) {
             var game = {
                 name: 'toto',
-                maxPlayers: 4
+                maxPlayers: 3
             };
             socket.emit('create game', game);
         } else {
@@ -240,7 +279,12 @@
     });
 
     socket.on('turn results', function (results) {
-        console.log(results);
+        for (var i = 0; i < results.actions.length; ++i) {
+            var message = document.createElement('div');
+            var action = results.actions[i];
+            message.textContent = action.owner + ' plays ' + action.type + '@' + getCoords(action);
+            document.getElementById('messages').appendChild(message);
+        }
     });
 
     document.querySelector('#clear > img').addEventListener('click', function () {

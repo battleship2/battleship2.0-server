@@ -12,6 +12,7 @@ var gulp = require('gulp');
 var path = require('path');
 var merge = require('merge2');
 var mocha = require('gulp-mocha');
+var mkdirp = require('mkdirp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
@@ -34,15 +35,17 @@ var paths = {
 
 gulp.task('ts', gulp.series(_ts));
 gulp.task('zip', gulp.series(_zip));
-gulp.task('hook', gulp.series('ts', _hook));
-gulp.task('serve', gulp.series('ts', _serve));
-gulp.task('minify', gulp.series('hook', _minify));
+gulp.task('mkdirp', gulp.series(_mkdirp));
 gulp.task('scratch', gulp.series(_scratch));
+
+gulp.task('hook', gulp.series('ts', _hook));
+gulp.task('serve', gulp.series('mkdirp', 'ts', _serve));
+gulp.task('minify', gulp.series('hook', _minify));
+
+gulp.task('test', gulp.series('scratch', 'ts', _test));
+gulp.task('test-watched', gulp.series('scratch', 'ts', _testWatched));
+
 gulp.task('build', gulp.series('scratch', 'minify', 'zip'));
-
-gulp.task('test', gulp.series('ts', _test));
-gulp.task('test-watched', gulp.series(_testWatched, 'test'));
-
 gulp.task('default', gulp.series('scratch', 'serve'));
 
 /**********************************************************************************/
@@ -50,6 +53,11 @@ gulp.task('default', gulp.series('scratch', 'serve'));
 /*                                     HOOKS                                      */
 /*                                                                                */
 /**********************************************************************************/
+
+function _mkdirp(done) {
+    mkdirp.sync('logs');
+    return done();
+}
 
 function _ts() {
     var tsResult = gulp.src(paths.ts)
@@ -69,10 +77,10 @@ function _ts() {
 function _minify() {
     return gulp.src(paths.js)
         .pipe(concat('server.js'))
-        .pipe(gulp.dest('src/min'))
+        .pipe(gulp.dest('src/dist/min'))
         .pipe(rename('server.min.js'))
         .pipe(uglify())
-        .pipe(gulp.dest('src/min'));
+        .pipe(gulp.dest('src/dist/min'));
 }
 
 function _hook(done) {
@@ -154,57 +162,52 @@ function _replace(data, from, to) {
 }
 
 function _scratch(error, toDelete) {
-    toDelete = toDelete || ['src'];
+    toDelete = toDelete || ['src', 'logs'];
     return del(toDelete);
 }
 
 function _zip() {
     var timestamp = new Date().toJSON().substring(0, 20).replace(/-|:/g, '').replace('T', '_');
-    return gulp.src('src/min/**')
+    return gulp.src('src/dist/**/*.js')
         .pipe(zip('battleship_server_' + timestamp + 'zip'))
-        .pipe(gulp.dest('src'));
+        .pipe(gulp.dest('src/dist'));
 }
 
 function _serve(done) {
     var stream = nodemon({
-            script: 'src/release/server.js',
-            watch: paths.ts,
-            ext: 'ts',
-            env: {'NODE_ENV': 'development'},
-            tasks: ['ts'],
-            // stdout:   false,
-            // readable: false
-        });
+        script: 'src/release/server.js',
+        ext: 'ts',
+        watch: paths.ts,
+        tasks: ['ts'],
+        stdout:   false,
+        readable: false
+    });
 
     stream.on('crash', function () {
         console.error('Application has crashed, restarting...');
         stream.emit('restart', 1);
     });
 
-    // stream.on('readable', function() {
-    //
-    //     // free memory
-    //     // bunyan && bunyan.kill();
-    //
-    //     bunyan = spawn('./node_modules/bunyan/bin/bunyan', ['--output', 'short', '--color'])
-    //         .on('error', function( err ){ throw err });
-    //
-    //     bunyan.stdout.pipe(process.stdout);
-    //     bunyan.stderr.pipe(process.stderr);
-    //
-    //     this.stdout.pipe(bunyan.stdin);
-    //     this.stderr.pipe(bunyan.stdin);
-    // });
+    stream.on('readable', function() {
+        bunyan = spawn('.\\node_modules\\.bin\\bunyan.cmd', ['-L', '-o', 'short', '--color'])
+            .on('error', function( err ){ throw err });
+
+        bunyan.stdout.pipe(process.stdout);
+        bunyan.stderr.pipe(process.stderr);
+
+        this.stdout.pipe(bunyan.stdin);
+        this.stderr.pipe(bunyan.stdin);
+    });
 
     return done();
 }
 
 function _testWatched(done) {
-    gulp.watch(paths.tests.server, gulp.series(_testServer));
+    gulp.watch(paths.tests, gulp.series('test'));
     return done();
 }
 
 function _test() {
-    return gulp.src(paths.tests.server)
+    return gulp.src(paths.tests)
         .pipe(mocha({reporter: 'dot'}));
 }

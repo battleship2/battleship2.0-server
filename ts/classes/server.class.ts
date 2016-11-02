@@ -1,7 +1,7 @@
-/// <reference path="../server.ts" />
+/// <reference path="../definitions/definitions.d.ts" />
 
 import Utils = require('../services/utils.service');
-import Logger = require('../classes/logger.class');
+import Logger = require('../services/logger.service');
 import Restify = require('restify');
 
 let _utils: Utils = new Utils();
@@ -55,7 +55,7 @@ class Server {
 
     public start = () : Server => {
         _server.listen(9001, () => {
-            _logger.info('All the magic happens when', _server.name, 'is listening at', _server.url)
+            _logger.info('All the magic happens when', _server.name, 'is listening at', _server.url);
         });
         return _instance;
     };
