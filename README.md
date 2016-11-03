@@ -32,6 +32,13 @@ First, run the server using the [Launch](https://github.com/battleship2/battlesh
 Then, in your favorite browser, open the `index.html` file located under `www` to launch a 4 players game.
 
 ## Docker
+
+### Quick launch
+
+```shell
+$ docker-compose up --build
+```
+
 To build or re-build the image, from the root of the project, type the following command:  
 
 ```shell
