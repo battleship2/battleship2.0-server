@@ -1,13 +1,11 @@
 FROM mhart/alpine-node:7.0.0
 
-RUN mkdir /app
-ADD package.json /app/package.json
-RUN cd /app; npm install --production
-ADD app.js /app/app.js
-ADD src /app/src
+COPY package.json /app/package.json
 
-WORKDIR /app
+RUN cd /app \
+    && npm install --production
 
-EXPOSE 9001
+COPY app.js /app/app.js
+COPY src /app/src
 
-CMD ["node", "/app/app.js"]
+ENTRYPOINT ["node", "/app/app.js"]
