@@ -5,7 +5,8 @@ COPY package.json /app/package.json
 RUN cd /app \
     && npm install --production
 
-COPY app.js /app/app.js
-COPY src /app/src
+RUN mkdir /logs
 
-ENTRYPOINT ["node", "/app/app.js"]
+COPY src/release /app
+
+ENTRYPOINT ["node", "/app/server.js"]

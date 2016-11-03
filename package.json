@@ -8,7 +8,6 @@
         "@types/node": "^6.0.46",
         "@types/restify": "^2.0.34",
         "@types/socket.io": "^1.4.27",
-        "bunyan": "^1.8.4",
         "chai": "^3.5.0",
         "del": "^2.2.2",
         "gulp": "github:gulpjs/gulp#4.0",
@@ -38,6 +37,7 @@
         "start": "gulp serve"
     },
     "dependencies": {
+        "bunyan": "^1.8.4",
         "restify": "^4.1.1",
         "socket.io": "^1.4.8"
     },
