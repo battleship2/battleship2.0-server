@@ -1,18 +1,25 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
+import * as http from 'http';
 import Game = require('./game.class');
 import Utils = require('../services/utils.service');
 import Logger = require('../services/logger.service');
 import BSData = require('../definitions/bsdata');
 import Nickname = require('../services/nickname.service');
 
-let __io: any = require('socket.io');
-let _io: any = null;
+let __io: SocketIOStatic = require('socket.io');
+let _io: SocketIO.Server = null;
 let _utils: Utils = new Utils();
 let _logger: Logger = null;
 let _buffer: BSBuffer = { sockets: {}, games: {} };
 let _instance: Socket = null;
 let _nickname: Nickname = new Nickname();
+
+// Used to hold the "enums" of the events in order to be able to simply modify them
+let _events = {
+    on: {},
+    emit: {}
+};
 
 class Socket {
 
@@ -44,10 +51,10 @@ class Socket {
     /*                                                                                */
     /**********************************************************************************/
 
-    public init = (server: any): Socket => {
+    public init = (server: http.Server): Socket => {
         _io = __io.listen(server);
 
-        _io.sockets.on('connection', socket => {
+        _io.sockets.on('connection', (socket: SocketIO.Socket) => {
             socket.game = null;
             socket.nickname = _getNickname();
 
@@ -85,17 +92,15 @@ class Socket {
 /*                                                                                */
 /**********************************************************************************/
 
-function _message(player: BSPlayer, message: string): Socket {
-    _logger.debug('_message:', message);
-
+function _message(socket: SocketIO.Socket, message: string): Socket {
     let messageData = {
-        id: player.id,
-        nickname: player.nickname,
-        message: message
+        id: socket.id,
+        message: message,
+        nickname: socket.nickname
     };
 
-    if (_isPlaying(player)) {
-        let game = _getGame(player);
+    if (_isPlaying(socket)) {
+        let game = _getGame(socket);
         game.emit(_io, 'message', messageData);
     } else {
         _io.sockets.in('lobby').emit('message', messageData);
@@ -103,55 +108,49 @@ function _message(player: BSPlayer, message: string): Socket {
     return _instance;
 }
 
-function _playTurn(player: BSPlayer, bomb: Array<BSAction>): Socket {
-    _logger.debug('_playTurn:', bomb);
-
-    if (_isPlaying(player)) {
-        let game = _getGame(player);
-        if (game.setNextActions(player, bomb)) {
-            player.emit('play turn', true);
+function _playTurn(socket: SocketIO.Socket, bomb: Array<BSAction>): Socket {
+    if (_isPlaying(socket)) {
+        let game = _getGame(socket);
+        if (game.setNextActions(socket, bomb)) {
+            socket.emit('play turn', true);
             if (game.hasEveryonePlayedTheTurn()) {
                 let results = game.playTheTurn();
                 game.emit(_io, 'turn results', results);
                 game.emit(_io, 'game state', {state: 'new turn'});
             }
         } else {
-            player.emit('play turn', {error: 'learn how to place a bomb…'});
+            socket.emit('play turn', {error: 'Learn how to place a bomb.'});
         }
     }
     return _instance;
 }
 
-function _placeShips(player: BSPlayer, ships: Array<BSShip>): Socket {
-    _logger.debug('_placeShips:', ships);
-
-    if (_isPlaying(player)) {
-        let game = _getGame(player);
+function _placeShips(socket: SocketIO.Socket, ships: Array<BSShip>): Socket {
+    if (_isPlaying(socket)) {
+        let game = _getGame(socket);
         if (game.state() === BSData.State.SETTING) {
-            if (game.placePlayerShips(player, ships)) {
-                player.emit('ship placement', true);
+            if (game.placePlayerShips(socket, ships)) {
+                socket.emit('ship placement', true);
                 if (game.state() === BSData.State.PLAYING) {
                     game.emit(_io, 'game state', {state: 'new turn'});
                     game.emit(_io, 'new round');
                 }
             } else {
-                player.emit('ship placement', {error: 'learn how to place your ships…'});
+                socket.emit('ship placement', {error: 'Learn how to place your ships.'});
             }
         } else {
-            player.emit('error', {message: 'it is not the moment to place your ship'})
+            socket.emit('refused', {message: 'It is not the moment to place your ship.'})
         }
     }
     return _instance;
 }
 
-function _ready(player: BSPlayer, ready: boolean): Socket {
-    _logger.debug('_ready:', ready);
-
-    if (_isPlaying(player)) {
-        let game = _getGame(player);
+function _ready(socket: SocketIO.Socket, ready: boolean): Socket {
+    if (_isPlaying(socket)) {
+        let game = _getGame(socket);
         if (game.state() === BSData.State.READY) {
-            game.setPlayerReady(player, ready);
-            game.emit(_io, 'player ready', {nickname: player.nickname, isReady: ready});
+            game.setPlayerReady(socket, ready);
+            game.emit(_io, 'player ready', {nickname: socket.nickname, isReady: ready});
             if (game.state() === BSData.State.SETTING) {
                 game.emit(_io, 'game state', {
                     state: 'place ship',
@@ -163,9 +162,7 @@ function _ready(player: BSPlayer, ready: boolean): Socket {
     return _instance;
 }
 
-function _listGames(player: BSPlayer): Socket {
-    _logger.debug('_listGames');
-
+function _listGames(socket: SocketIO.Socket): Socket {
     let games = [];
 
     _utils.forEach(_buffer.games, game => {
@@ -174,19 +171,17 @@ function _listGames(player: BSPlayer): Socket {
         }
     });
 
-    player.emit('list games', games);
+    socket.emit('list games', games);
     return _instance;
 }
 
-function _leaveGame(player: BSPlayer): Socket {
-    _logger.debug('_leaveGame');
+function _leaveGame(socket: SocketIO.Socket): Socket {
+    if (!_utils.isNull(socket.game)) {
 
-    if (player.game !== null) {
-
-        let game = _getGame(player);
-        game.removePlayer(player);
-        game.emit(_io, 'player left', {nickname: player.nickname});
-        player.emit('game left');
+        let game = _getGame(socket);
+        game.removePlayer(socket);
+        game.emit(_io, 'player left', {nickname: socket.nickname});
+        socket.emit('game left');
         let playersCount = game.countPlayers();
         if (playersCount <= 0 || (game.state() === BSData.State.READY && !game.isStillPlayable())) {
             if (playersCount > 0) {
@@ -197,68 +192,54 @@ function _leaveGame(player: BSPlayer): Socket {
         }
 
     } else {
-        player.emit('error', {message: 'To leave a game, you first need to join one…'});
+        socket.emit('refused', {message: 'To leave a game, you first need to join one.'});
     }
     return _instance;
 }
 
 function _getNickname(): string {
-    _logger.debug('_getNickname');
-
     let nickname = '';
     do { nickname = _nickname.get(); }
     while (nickname in _buffer.sockets);
     return nickname;
 }
 
-function _isPlaying(player: BSPlayer): boolean {
-    _logger.debug('_isPlaying');
-
-    return player.game && player.game in _buffer.games;
+function _isPlaying(socket: SocketIO.Socket): boolean {
+    return socket.game && socket.game in _buffer.games;
 }
 
-function _playerData(player: BSPlayer): { id: string, nickname: string } {
-    _logger.debug('_playerData');
-
+function _playerData(socket: SocketIO.Socket): { id: string, nickname: string } {
     return {
-        id: player.id,
-        nickname: player.nickname
+        id: socket.id,
+        nickname: socket.nickname
     };
 }
 
-function _getGame(player: BSPlayer): Game {
-    _logger.debug('_getGame');
-
-    return _buffer.games[player.game];
+function _getGame(socket: SocketIO.Socket): Game {
+    return _buffer.games[socket.game];
 }
 
-function _disconnect(player: BSPlayer): Socket {
-    _logger.debug('_disconnect');
-
-    if (_isPlaying(player)) {
-        _getGame(player).removePlayer(player);
+function _disconnect(socket: SocketIO.Socket): Socket {
+    if (_isPlaying(socket)) {
+        _getGame(socket).removePlayer(socket);
     }
-    delete _buffer.sockets[player.nickname];
+    delete _buffer.sockets[socket.nickname];
     return _instance;
 }
 
-function _createGame(player: BSPlayer, data: any): Socket {
-    _logger.debug('_createGame:', data);
-
-    if (!_isPlaying(player)) {
+function _createGame(socket: SocketIO.Socket, data: BSGameData): Socket {
+    if (!_isPlaying(socket)) {
         let game = new Game(data.name, data.maxPlayers, data.password);
-        game.addPlayer(player);
+        game.addPlayer(socket);
         _buffer.games[game.getId()] = game;
-        player.emit('game created', game.summary());
+        socket.emit('game created', game.summary());
     } else {
-        player.emit('error', {message: 'you are already in a game.'});
+        socket.emit('refused', {message: 'You already are in a game.'});
     }
     return _instance;
 }
 
-function _joinGame(socket: BSPlayer, data: { gameId: string }) {
-    _logger.debug('_joinGame:', data);
-
+function _joinGame(socket: SocketIO.Socket, data: { gameId: string }) {
     if (_utils.isDefined(data.gameId) && data.gameId in _buffer.games) {
         let game = _buffer.games[data.gameId];
         if (game.acceptPlayer(socket, data)) {
@@ -268,10 +249,10 @@ function _joinGame(socket: BSPlayer, data: { gameId: string }) {
                 game.emit(_io, 'game state', {state: 'ready'});
             }
         } else {
-            socket.emit('refused');
+            socket.emit('refused', {message: 'It appears that you cannot join this game.'});
         }
     } else {
-        socket.emit('refused', {message: 'no game with id ' + data.gameId});
+        socket.emit('refused', {message: 'No game found with id: ' + data.gameId});
     }
 }
 
