@@ -189,7 +189,13 @@ function _serve(done) {
     });
 
     stream.on('readable', function() {
-        bunyan = spawn('.\\node_modules\\.bin\\bunyan.cmd', ['-L', '-o', 'short', '--color'])
+        var bunyanPath = './node_modules/.bin/bunyan';
+
+        if (/^win/.test(process.platform)) {
+            bunyanPath = '.\\node_modules\\.bin\\bunyan.cmd';
+        }
+
+        bunyan = spawn(bunyanPath, ['-L', '-o', 'short', '--color'])
             .on('error', function( err ){ throw err });
 
         bunyan.stdout.pipe(process.stdout);

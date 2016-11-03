@@ -1,8 +1,7 @@
-.idea
-node_modules
+.idea/
+node_modules/
 *.swp
 *.iml
 _src/
-server-errors.log
-server-traces.log
-src
+src/
+logs/
