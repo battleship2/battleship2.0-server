@@ -21,6 +21,14 @@ declare module NodeJS  {
     }
 }
 
+declare module SocketIO  {
+    interface Socket {
+        id: string
+        game: any
+        nickname: string
+    }
+}
+
 declare module BSData {
     enum State { READY, PLAYING, SETTING, WAITING_PLAYERS }
     enum ActionType { BOMB }

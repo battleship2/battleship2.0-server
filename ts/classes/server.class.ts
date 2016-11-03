@@ -1,13 +1,13 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
+import * as http from 'http';
 import Utils = require('../services/utils.service');
 import Logger = require('../services/logger.service');
 import Restify = require('restify');
 
 let _utils: Utils = new Utils();
-let _server: any = null;
+let _server: Restify.Server = null;
 let _logger: Logger = null;
-let _restify: any = Restify;
 let _instance: Server = null;
 
 class Server {
@@ -32,12 +32,11 @@ class Server {
 
             _logger = new Logger();
 
-            _server = _restify.createServer({
+            _server = Restify.createServer({
                 log: _logger.get(),
                 name: 'battleship-server',
                 version: '0.0.1'
             });
-
         }
 
         return _instance;
@@ -49,7 +48,7 @@ class Server {
     /*                                                                                */
     /**********************************************************************************/
 
-    public get = () : any => {
+    public get = () : http.Server => {
         return _server.server;
     };
 
