@@ -10,7 +10,7 @@ describe('chat', function () {
 
     var server,
         clientA, clientB, clientC,
-        port = 9001,
+        port = 9000,
         url = 'http://localhost:' + port;
 
 
@@ -19,7 +19,7 @@ describe('chat', function () {
         socket = new SocketClass();
 
         socket.init(server.get());
-        server.start();
+        server.start(port);
 
         clientA = ioClient.connect(url);
         clientB = ioClient.connect(url);

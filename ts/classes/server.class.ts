@@ -52,8 +52,8 @@ class Server {
         return _server.server;
     };
 
-    public start = () : Server => {
-        _server.listen(9001, () => {
+    public start = (port: number = 9001) : Server => {
+        _server.listen(port, () => {
             _logger.info('All the magic happens when', _server.name, 'is listening at', _server.url);
         });
         return _instance;

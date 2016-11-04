@@ -10,7 +10,7 @@ describe('socket', function () {
 
     var server,
         clientA, clientB, clientC,
-        port = 9001,
+        port = 9000,
         url = 'http://localhost:' + port;
 
 
@@ -20,7 +20,7 @@ describe('socket', function () {
         socket.reset();
 
         socket.init(server.get());
-        server.start();
+        server.start(port);
 
         clientA = ioClient.connect(url);
         clientB = ioClient.connect(url);
