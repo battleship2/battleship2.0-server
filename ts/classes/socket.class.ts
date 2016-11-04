@@ -165,7 +165,7 @@ function _ready(socket: SocketIO.Socket, ready: boolean): Socket {
 function _listGames(socket: SocketIO.Socket): Socket {
     let games = [];
 
-    _utils.forEach(_buffer.games, game => {
+    _utils.forEach(_buffer.games, (game: Game) => {
         if (game.isOpen()) {
             games.push(game.summary());
         }
@@ -205,7 +205,7 @@ function _getNickname(): string {
 }
 
 function _isPlaying(socket: SocketIO.Socket): boolean {
-    return socket.game && socket.game in _buffer.games;
+    return _utils.isString(socket.game) && socket.game in _buffer.games;
 }
 
 function _playerData(socket: SocketIO.Socket): { id: string, nickname: string } {
@@ -239,7 +239,7 @@ function _createGame(socket: SocketIO.Socket, data: BSGameData): Socket {
     return _instance;
 }
 
-function _joinGame(socket: SocketIO.Socket, data: { gameId: string }) {
+function _joinGame(socket: SocketIO.Socket, data: BSGameData) {
     if (_utils.isDefined(data.gameId) && data.gameId in _buffer.games) {
         let game = _buffer.games[data.gameId];
         if (game.acceptPlayer(socket, data)) {

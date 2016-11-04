@@ -46,11 +46,11 @@ class GameLogic {
             _actionsDoNotOverlap(map, actions);
     };
 
-    public processTurn = (playersActions: Array<Array<BSAction>>, map: BSMap): Array<BSAction> => {
+    public processTurn = (playersActions: { [nickname: string]: Array<BSAction> }, map: BSMap): Array<BSAction> => {
         let actionsResults: Array<BSAction> = [];
-        _utils.forEach(playersActions, (actions, player) => {
-            _utils.forEach(actions, action => {
-                actionsResults.push(_processAction(player, action, map.boards));
+        _utils.forEach(playersActions, (actions: Array<BSAction>, nickname: string) => {
+            _utils.forEach(actions, (action: BSAction) => {
+                actionsResults.push(_processAction(nickname, action, map.boards));
             });
         });
         return actionsResults;
@@ -64,7 +64,7 @@ class GameLogic {
 /*                                                                                */
 /**********************************************************************************/
 
-function _processAction(nickname: string, playerAction: BSAction, boards: {}): BSAction {
+function _processAction(nickname: string, playerAction: BSAction, boards: BsMapBoardToString): BSAction {
     let action: BSAction = {
         x: playerAction.x,
         y: playerAction.y,
@@ -82,19 +82,19 @@ function _processAction(nickname: string, playerAction: BSAction, boards: {}): B
     return action;
 }
 
-function _processBomb(player: string, bomb: BSAction, boards: {}): Array<any> {
+function _processBomb(nickname: string, bomb: BSAction, boards: BsMapBoardToString): Array<BSTurnResult> {
     let result = [];
-    _utils.forEach(boards, (board, _player) => {
-        if (_player === player) {
+    _utils.forEach(boards, (board: BSMapBoard, player: string) => {
+        if (player === nickname) {
             return;
         }
 
-        _utils.forEach(board.ships, ship => {
+        _utils.forEach(board.ships, (ship: BSShip) => {
             let hit = _colliding(bomb, ship);
             if (hit) {
                 result.push({
                     type: 'hit ship',
-                    owner: _player,
+                    owner: player,
                     target: ship.id,
                     localHit: hit
                 });
@@ -112,7 +112,7 @@ function _colliding(bomb: BSAction, ship: BSShip): boolean | BSCoordinates {
 
     try {
         if (_utils.isArray(ship.hits) && ship.hits.length) {
-            _utils.forEach(ship.hits, hit => {
+            _utils.forEach(ship.hits, (hit: BSCoordinates) => {
                 if (hit.x + ship.x === bomb.x && hit.y + ship.y === bomb.y) {
                     throw new Error();
                 }
@@ -134,7 +134,7 @@ function _colliding(bomb: BSAction, ship: BSShip): boolean | BSCoordinates {
 function _actionsDoNotOverlap(map: BSMap, actions: Array<BSAction>): boolean {
     try {
         let occupied = [];
-        _utils.forEach(actions, action => {
+        _utils.forEach(actions, (action: BSAction) => {
             let index = action.x + action.y * map.width;
             if (occupied.indexOf(index) !== -1) throw new Error();
             occupied.push(index);
@@ -145,7 +145,7 @@ function _actionsDoNotOverlap(map: BSMap, actions: Array<BSAction>): boolean {
 
 function _actionsWithinBoundaries(map: BSMap, actions: Array<BSAction>): boolean {
     try {
-        _utils.forEach(actions, action => {
+        _utils.forEach(actions, (action: BSAction) => {
             if (!_actionWithinBoundaries(map, action)) throw new Error();
         });
     } catch (exception) { return false; }
@@ -163,7 +163,7 @@ function _actionWithinBoundaries(map: BSMap, action: BSAction): boolean {
 function _validNumberOfActions(map: BSMap, actions: Array<BSAction>): boolean {
     try {
         let check = {};
-        _utils.forEach(actions, action => {
+        _utils.forEach(actions, (action: BSAction) => {
             let result = check[action.type];
             check[action.type] = _utils.isDefined(result) ? result + 1 : 1;
         });
@@ -182,11 +182,11 @@ function _mapDimensionsAreValid(map: BSMap): boolean {
 function _hasAllExpectedShips(map: BSMap, ships: Array<BSShip>): boolean {
     try {
         let check = {};
-        _utils.forEach(map.ships, (ship, type) => {
+        _utils.forEach(map.ships, (ship: BSShip, type: string) => {
             check[type] = { expected: ship };
         });
 
-        _utils.forEach(ships, ship => {
+        _utils.forEach(ships, (ship: BSShip) => {
             if (_utils.isUndefined(check[ship.type])) {
                 throw new Error();
             }
@@ -206,8 +206,8 @@ function _hasAllExpectedShips(map: BSMap, ships: Array<BSShip>): boolean {
 
 function _noShipsAreOverlapping(ships: Array<BSShip>): boolean {
     try {
-        _utils.forEach(ships, shipA => {
-            _utils.forEach(ships, shipB => {
+        _utils.forEach(ships, (shipA: BSShip) => {
+            _utils.forEach(ships, (shipB: BSShip) => {
                 if (shipA === shipB) return;
                 if (_overlapping(shipA, shipB)) throw new Error();
             });
@@ -223,7 +223,7 @@ function _overlapping(shipA: BSShip, shipB: BSShip): boolean {
 
 function _allShipsAreWithinBoundaries(map: BSMap, ships: Array<BSShip>): boolean {
     try {
-        _utils.forEach(ships, ship => {
+        _utils.forEach(ships, (ship: BSShip) => {
             if (!_shipIsWithinBoundaries(map, ship)) throw new Error();
         });
     } catch (exception) { return false; }

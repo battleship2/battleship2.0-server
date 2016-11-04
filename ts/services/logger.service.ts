@@ -5,9 +5,7 @@ import Bunyan = require('bunyan');
 import Restify = require('restify');
 
 let _utils: Utils = new Utils();
-let _logger: any = null;
-let _bunyan: any = Bunyan;
-let _restify: any = Restify;
+let _logger: Bunyan.Logger = null;
 let _instance: Logger = null;
 
 class Logger {
@@ -35,7 +33,10 @@ class Logger {
         if (_utils.isNull(_instance)) {
             _instance = this;
 
-            _logger = new _bunyan({
+            let _bunyan: any = Bunyan;
+            let _restify: any = Restify;
+
+            _logger = new Bunyan.Logger({
                 name: 'battleship-server-logger',
                 streams: [
                     {
@@ -112,7 +113,7 @@ class Logger {
     /*                                                                                */
     /**********************************************************************************/
 
-    public get = () : any => {
+    public get = () : Bunyan.Logger => {
         return _logger;
     };
 

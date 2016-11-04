@@ -24,7 +24,7 @@ declare module NodeJS  {
 declare module SocketIO  {
     interface Socket {
         id: string
-        game: any
+        game: string
         nickname: string
     }
 }
@@ -43,23 +43,34 @@ declare module BSData {
 interface BSGameData {
     id: string
     name: string
+    gameId: string
     password: string
     maxPlayers: number
 }
 
+interface BSGameSummary {
+    id: string
+    name: string
+    players: number
+    password: boolean
+    maxPlayers: number
+}
+
 interface BSBuffer {
-    games: {}
-    sockets: {}
+    games: { [gameId: string]: any } // Cannot reference Game here
+    sockets: { [nickname: string]: SocketIO.Socket }
 }
 
 interface BSPlayer {
-    id: string
-    on: Function
-    game: any
-    emit: Function
-    join: Function
-    leave: Function
+    score: number
+    isReady: boolean
+}
+
+interface BSPlayerInfo {
+    score: number
+    health: number
     nickname: string
+    maxHealth: number
 }
 
 interface BSCoordinates {
@@ -84,7 +95,7 @@ interface BSAction {
     id: string
     type: BSData.ActionType
     owner: string
-    result: Array<any>
+    result: Array<BSTurnResult>
 }
 
 interface BSMap {
@@ -92,7 +103,25 @@ interface BSMap {
     ships: {}
     width: number
     height: number
-    boards: {}
+    boards: { [nickname: string]: BSMapBoard }
 }
 
+interface BSMapBoard {
+    ships?: { [shipId: string]: BSShip }
+}
 
+interface BsMapBoardToString {
+    [nickname: string]: BSMapBoard
+}
+
+interface BSTurnResult {
+    type: string
+    owner: string
+    target: string
+    localHit: BSCoordinates
+}
+
+interface BSScore {
+    miss: number
+    score: number
+}
