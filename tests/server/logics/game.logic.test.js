@@ -1,8 +1,6 @@
 var expect = require('chai').expect,
     mechanics = require('../../../src/release/logics/game.logic');
 
-console.log(mechanics);
-
 describe('basic game mechanics', function () {
 
     var ships = [],

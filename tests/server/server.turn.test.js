@@ -1,5 +1,6 @@
 var expect = require('chai').expect,
     sinon = require('sinon'),
+    BSData = require('../../src/release/definitions/bsdata'),
     Game = require('../../src/release/classes/game.class');
 
 describe('turn process for basic game', function () {
@@ -16,25 +17,6 @@ describe('turn process for basic game', function () {
         submarine: 3,
         destroyer: 2
     };
-
-    beforeEach(function () {
-        game = new Game(1, 'test', 3);
-        game.map.width = 10;
-        game.map.height = 10;
-        game.ship = {destroyer : 1};
-        player1 = createMockPlayer('player1');
-        game.addPlayer(player1);
-        player2 = createMockPlayer('player2');
-        game.addPlayer(player2);
-        player3 = createMockPlayer('player3');
-        game.addPlayer(player3);
-        game.setPlayerReady(player1, true);
-        game.setPlayerReady(player2, true);
-        game.setPlayerReady(player3, true);
-        game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
-        game.placePlayerShips(player2, [makeDestroyer(1, 1)]);
-        game.placePlayerShips(player3, [makeDestroyer(2, 2)]);
-    });
 
     var createMockPlayer = function (id) {
         return {
@@ -60,9 +42,28 @@ describe('turn process for basic game', function () {
         return {
             x: x,
             y: y,
-            type: 'bomb'
+            type: BSData.ActionType.BOMB
         };
     };
+
+    beforeEach(function () {
+        game = new Game('test', 3);
+        game.map.width = 10;
+        game.map.height = 10;
+        game.ship = {destroyer : 1};
+        player1 = createMockPlayer('player1');
+        game.addPlayer(player1);
+        player2 = createMockPlayer('player2');
+        game.addPlayer(player2);
+        player3 = createMockPlayer('player3');
+        game.addPlayer(player3);
+        game.setPlayerReady(player1, true);
+        game.setPlayerReady(player2, true);
+        game.setPlayerReady(player3, true);
+        game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
+        game.placePlayerShips(player2, [makeDestroyer(1, 1)]);
+        game.placePlayerShips(player3, [makeDestroyer(2, 2)]);
+    });
 
     it('should save all the players actions during the turn', function () {
         game.map.max = {action: 1};
@@ -73,22 +74,22 @@ describe('turn process for basic game', function () {
         game.setNextActions(player2, [makeBomb(2, 2)]);
 
         expect(game.actions['player1']).to.deep.equal([{
-            x: 1, y: 1, type: 'bomb', owner: 'player1', id: 'player1-action-0'
+            x: 1, y: 1, type: BSData.ActionType.BOMB, owner: 'player1', id: 'player1-action-0'
         }]);
         expect(game.actions['player2']).to.deep.equal([{
-            x: 2, y: 2, type: 'bomb', owner: 'player2', id: 'player2-action-0'
+            x: 2, y: 2, type: BSData.ActionType.BOMB, owner: 'player2', id: 'player2-action-0'
         }]);
 
         game.setNextActions(player1, [makeBomb(3, 3)]);
         expect(game.actions['player1'][0]).to.deep.equal({
-            x: 3, y: 3, type: 'bomb', owner: 'player1', id: 'player1-action-0'
+            x: 3, y: 3, type: BSData.ActionType.BOMB, owner: 'player1', id: 'player1-action-0'
         });
 
         expect(game.hasEveryonePlayedTheTurn()).to.be.false;
 
         game.setNextActions(player2, [makeBomb(3, 3)]);
         expect(game.actions['player2'][0]).to.deep.equal({
-            x: 3, y: 3, type: 'bomb', owner: 'player2', id: 'player2-action-0'
+            x: 3, y: 3, type: BSData.ActionType.BOMB, owner: 'player2', id: 'player2-action-0'
         });
 
         expect(game.hasEveryonePlayedTheTurn()).to.be.false;
@@ -97,13 +98,13 @@ describe('turn process for basic game', function () {
         expect(game.hasEveryonePlayedTheTurn()).to.be.true;
 
         expect(game.actions['player1']).to.deep.equal([{
-            x: 3, y: 3, type: 'bomb', owner: 'player1', id: 'player1-action-0'
+            x: 3, y: 3, type: BSData.ActionType.BOMB, owner: 'player1', id: 'player1-action-0'
         }]);
         expect(game.actions['player2']).to.deep.equal([{
-            x: 3, y: 3, type: 'bomb', owner: 'player2', id: 'player2-action-0'
+            x: 3, y: 3, type: BSData.ActionType.BOMB, owner: 'player2', id: 'player2-action-0'
         }]);
         expect(game.actions['player3']).to.deep.equal([{
-            x: 4, y: 4, type: 'bomb', owner: 'player3', id: 'player3-action-0'
+            x: 4, y: 4, type: BSData.ActionType.BOMB, owner: 'player3', id: 'player3-action-0'
         }]);
     });
 
@@ -139,8 +140,6 @@ describe('turn process for basic game', function () {
         var result = game.playTheTurn();
 
         expect(result.actions).to.have.length(3);
-
-
     });
 
     it("should return the player's round score", function () {
@@ -148,10 +147,10 @@ describe('turn process for basic game', function () {
 
         game.setNextActions(player1, [
             makeBomb(5, 5), // miss
-            makeBomb(2, 2) // hit player2
+            makeBomb(1, 2) // hit player2
         ]);
         game.setNextActions(player2, [
-            makeBomb(1, 0) // hit player1
+            makeBomb(0, 1) // hit player1
         ]);
         game.setNextActions(player3, []);
 

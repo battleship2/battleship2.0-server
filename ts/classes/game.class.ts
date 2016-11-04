@@ -14,7 +14,7 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public map: BSMap = { max: {action: 1}, ships: {destroyer: 1}, width: 10, height: 10, boards: {} };
+    public map: BSMap = { max: {action: 0}, ships: {}, width: 10, height: 10, boards: {} };
     public name: string = '';
     public logic: GameLogic = new GameLogic();
     public players: { [nickname: string]: BSPlayer } = {};
@@ -46,7 +46,13 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public state = () : BSData.State => {
+    public state = (__state?: BSData.State) : BSData.State => {
+
+        if (_utils.isUndefined(__state)) {
+            return this._state;
+        }
+
+        this._state = __state;
         return this._state;
     };
 
@@ -137,14 +143,14 @@ class Game {
             return false;
         }
 
-        let nickname = socket.nickname;
-        this.actions[nickname] = [];
+        this.actions[socket.nickname] = [];
 
         _utils.forEach(actions, (action: BSAction, index: string) => {
-            action.id = nickname + '-action-' + index;
-            action.owner = nickname;
-            this.actions[nickname].push(action);
+            action.id = socket.nickname + '-action-' + index;
+            action.owner = socket.nickname;
+            this.actions[socket.nickname].push(action);
         });
+
         return true;
     };
 
@@ -241,18 +247,18 @@ class Game {
 /**********************************************************************************/
 
 function _updateState(): Game {
-    switch (this.state) {
+    switch (this._state) {
         case BSData.State.WAITING_PLAYERS:
             if (!_hasAvailableSlot.call(this)) {
-                this.state = BSData.State.READY;
+                this._state = BSData.State.READY;
             }
             break;
 
         case BSData.State.READY:
             if (_hasAvailableSlot.call(this)) {
-                this.state = BSData.State.WAITING_PLAYERS;
+                this._state = BSData.State.WAITING_PLAYERS;
             } else if (_areAllPlayersReady.call(this)) {
-                this.state = BSData.State.SETTING;
+                this._state = BSData.State.SETTING;
             }
             break;
     }

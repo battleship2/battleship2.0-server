@@ -42,8 +42,8 @@ gulp.task('hook', gulp.series('ts', _hook));
 gulp.task('serve', gulp.series('mkdirp', 'ts', _serve));
 gulp.task('minify', gulp.series('hook', _minify));
 
-gulp.task('test', gulp.series('scratch', 'ts', _test));
-gulp.task('test-watched', gulp.series('scratch', 'ts', _testWatched));
+gulp.task('test', gulp.series('scratch', 'mkdirp', 'ts', _test));
+gulp.task('test-watched', gulp.series('scratch', 'mkdirp', 'ts', _testWatched));
 
 gulp.task('build', gulp.series('scratch', 'minify', 'zip'));
 gulp.task('default', gulp.series('scratch', 'serve'));

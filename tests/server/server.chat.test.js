@@ -1,6 +1,8 @@
 var expect = require('chai').expect,
     restify = require('restify'),
     socket = require('../../src/release/classes/socket.class'),
+    SocketClass = require('../../src/release/classes/socket.class'),
+    ServerClass = require('../../src/release/classes/server.class'),
     io = require('socket.io'),
     ioClient = require('socket.io-client');
 
@@ -8,14 +10,17 @@ describe('chat', function () {
 
     var server,
         clientA, clientB, clientC,
-        port = 9000,
+        port = 9001,
         url = 'http://localhost:' + port;
 
 
     beforeEach(function (done) {
-        server = restify.createServer();
-        server.listen(port);
-        socket(io.listen(server.server));
+        server = new ServerClass();
+        socket = new SocketClass();
+
+        socket.init(server.get());
+        server.start();
+
         clientA = ioClient.connect(url);
         clientB = ioClient.connect(url);
         clientC = ioClient.connect(url);

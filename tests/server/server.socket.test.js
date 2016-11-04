@@ -1,6 +1,8 @@
 var expect = require('chai').expect,
     restify = require('restify'),
     socket = require('../../src/release/classes/socket.class'),
+    SocketClass = require('../../src/release/classes/socket.class'),
+    ServerClass = require('../../src/release/classes/server.class'),
     io = require('socket.io'),
     ioClient = require('socket.io-client');
 
@@ -8,14 +10,18 @@ describe('socket', function () {
 
     var server,
         clientA, clientB, clientC,
-        port = 9000,
+        port = 9001,
         url = 'http://localhost:' + port;
 
 
     beforeEach(function (done) {
-        server = restify.createServer();
-        server.listen(port);
-        socket(io.listen(server.server));
+        server = new ServerClass();
+        socket = new SocketClass();
+        socket.reset();
+
+        socket.init(server.get());
+        server.start();
+
         clientA = ioClient.connect(url);
         clientB = ioClient.connect(url);
         clientC = ioClient.connect(url);
@@ -46,7 +52,7 @@ describe('socket', function () {
         });
         clientA.on('game created', function (game) {
             expect(game.name).to.equal('test');
-            expect(game.id).to.be.equal(1);
+            expect(game.id).not.to.be.undefined;
             expect(game.players).to.be.equal(1);
             expect(game.maxPlayers).to.be.equal(10);
             done()

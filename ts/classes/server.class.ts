@@ -59,6 +59,11 @@ class Server {
         return _instance;
     };
 
+    public close = () : Server => {
+        _server.close();
+        return _instance;
+    };
+
     /**********************************************************************************/
     /*                                                                                */
     /*                               PRIVATE MEMBERS                                  */

@@ -36,7 +36,7 @@ class Logger {
             let _bunyan: any = Bunyan;
             let _restify: any = Restify;
 
-            _logger = new Bunyan.Logger({
+            _logger = new _bunyan({
                 name: 'battleship-server-logger',
                 streams: [
                     {
