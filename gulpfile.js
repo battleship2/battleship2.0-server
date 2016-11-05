@@ -11,7 +11,7 @@ var zip = require('gulp-zip');
 var gulp = require('gulp');
 var path = require('path');
 var merge = require('merge2');
-var mocha = require('gulp-mocha');
+var mocha = require('gulp-spawn-mocha');
 var spawn = require('child_process').spawn;
 var mkdirp = require('mkdirp');
 var concat = require('gulp-concat');
@@ -217,7 +217,8 @@ function _serve(done) {
     return done();
 }
 
-function _test() {
-    return gulp.src(paths.tests)
-        .pipe(mocha({reporter: 'dot'}));
+function _test(done) {
+    gulp.src(paths.tests)
+        .pipe(mocha({reporter: 'dot'}))
+        .once('end', done);
 }
