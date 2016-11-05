@@ -105,7 +105,7 @@ function _processBomb(nickname: string, bomb: BSAction, boards: BsMapBoardToStri
 
 function _colliding(bomb: BSAction, ship: BSShip): boolean | BSCoordinates {
 
-    if (ship.destroyed) {
+    if (_utils.isDefined(ship.destroyed) && ship.destroyed) {
         return false;
     }
 
