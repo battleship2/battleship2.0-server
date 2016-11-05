@@ -140,10 +140,10 @@ describe('turn process for basic game', function () {
 
         game.setNextActions(player1, [
             makeBomb(5, 5), // miss
-            makeBomb(1, 2) // hit player2
+            makeBomb(2, 1) // hit player2
         ]);
         game.setNextActions(player2, [
-            makeBomb(0, 1) // hit player1
+            makeBomb(1, 0) // hit player1
         ]);
         game.setNextActions(player3, []);
 
