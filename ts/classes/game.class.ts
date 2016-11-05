@@ -63,8 +63,8 @@ class Game {
 
     public hasEveryonePlayedTheTurn = () : boolean => {
         try {
-            _utils.forEach(this.players, (player, nickname) => {
-                if (_utils.isUndefined(this.actions[nickname])) {
+            _utils.forEach(this.players, (player: BSPlayer, bs_uuid: string) => {
+                if (_utils.isUndefined(this.actions[bs_uuid])) {
                     throw new Error();
                 }
             });
@@ -98,7 +98,7 @@ class Game {
         return Object.keys(this.players);
     };
 
-    public playTheTurn = () : {} => {
+    public playTheTurn = () : BSTurn => {
         let actions = this.logic.processTurn(this.actions, this.map);
         let scores = _getTurnScores.call(this, actions);
 
@@ -110,23 +110,25 @@ class Game {
 
         return {
             actions: actions,
-            turnScores: scores,
-            players: this.getPlayersInfos()
+            players: this.getPlayersInfos(),
+            turnScores: scores
         };
     };
 
     public getPlayersInfos = () : Array<BSPlayerInfo> => {
         let infos = [];
 
-        _utils.forEach(this.map.boards, (board: BSMapBoard, nickname: string) => {
+        _utils.forEach(this.map.boards, (board: BSMapBoard, bs_uuid: string) => {
+            let player: BSPlayer = this.players[bs_uuid];
             let playerInfo: BSPlayerInfo = {
-                score: this.players[nickname].score,
+                id: bs_uuid,
+                score: player.score,
+                nickname: player.nickname,
                 health: 0,
-                nickname: nickname,
                 maxHealth: 0
             };
 
-            _utils.forEach(this.map.boards[nickname].ships, (ship: BSShip) => {
+            _utils.forEach(board.ships, (ship: BSShip) => {
                 let shipHealth = ship.width * ship.height;
                 playerInfo.maxHealth += shipHealth;
                 if (ship.destroyed) {
@@ -144,12 +146,12 @@ class Game {
             return false;
         }
 
-        this.actions[socket.nickname] = [];
+        this.actions[socket.bs_uuid] = [];
 
         _utils.forEach(actions, (action: BSAction, index: string) => {
-            action.id = socket.nickname + "-action-" + index;
-            action.owner = socket.nickname;
-            this.actions[socket.nickname].push(action);
+            action.id = socket.bs_uuid + "-action-" + index;
+            action.owner = socket.bs_uuid;
+            this.actions[socket.bs_uuid].push(action);
         });
 
         return true;
@@ -157,7 +159,7 @@ class Game {
 
     public setPlayerReady = (socket: SocketIO.Socket, isReady: boolean) : Game => {
         if (_hasPlayer.call(this, socket) && this.state() === BSData.State.READY) {
-            this.players[socket.nickname].isReady = isReady;
+            this.players[socket.bs_uuid].isReady = isReady;
             _updateState.call(this);
         }
         return this;
@@ -166,20 +168,20 @@ class Game {
     public placePlayerShips = (socket: SocketIO.Socket, ships: Array<BSShip>) : boolean => {
         if (this.logic.isDispositionValid(this.map, ships)) {
 
-            if (_utils.isUndefined(this.map.boards[socket.nickname])) {
-                this.map.boards[socket.nickname] = {};
+            if (_utils.isUndefined(this.map.boards[socket.bs_uuid])) {
+                this.map.boards[socket.bs_uuid] = {};
             }
-            this.map.boards[socket.nickname].ships = {};
+            this.map.boards[socket.bs_uuid].ships = {};
 
             _utils.forEach(ships, (ship: BSShip, index: string) => {
-                ship.id = socket.nickname + "-ship-" + index;
+                ship.id = socket.bs_uuid + "-ship-" + index;
                 ship.hits = [];
-                this.map.boards[socket.nickname].ships[ship.id] = ship;
+                this.map.boards[socket.bs_uuid].ships[ship.id] = ship;
             });
 
             let allReady = true;
-            _utils.forEach(this.players, (player: BSPlayer, nickname: string) => {
-                if (_utils.isUndefined(this.map.boards[nickname])) {
+            _utils.forEach(this.players, (player: BSPlayer, bs_uuid: string) => {
+                if (_utils.isUndefined(this.map.boards[bs_uuid])) {
                     allReady = false;
                 }
             });
@@ -211,9 +213,10 @@ class Game {
     };
 
     public addPlayer = (socket: SocketIO.Socket) : Game => {
-        this.players[socket.nickname] = {
+        this.players[socket.bs_uuid] = {
+            score: 0,
             isReady: false,
-            score: 0
+            nickname: socket.nickname
         };
         socket.join(this.socketRoomName);
         socket.leave("lobby");
@@ -226,7 +229,7 @@ class Game {
         socket.join("lobby");
         socket.leave(this.socketRoomName);
         socket.game = null;
-        delete this.players[socket.nickname];
+        delete this.players[socket.bs_uuid];
         _updateState.call(this);
         return this;
     };
@@ -274,7 +277,7 @@ function _passwordIsCorrect(data: BSGameData): boolean {
 }
 
 function _hasPlayer(socket: SocketIO.Socket): boolean {
-    return socket.nickname in this.players;
+    return socket.bs_uuid in this.players;
 }
 
 function _hasAvailableSlot(): boolean {
@@ -348,8 +351,8 @@ function _updateBoards(actions: Array<BSAction>): Game {
 }
 
 function _updatePlayersInfos(scores: BSScoreRegistry): Game {
-    _utils.forEach(scores, (score: BSScore, owner: string) => {
-        this.players[owner].score += score.score;
+    _utils.forEach(scores, (score: BSScore, bs_uuid: string) => {
+        this.players[bs_uuid].score += score.score;
     });
     return this;
 }

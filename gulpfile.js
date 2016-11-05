@@ -13,14 +13,13 @@ var path = require('path');
 var merge = require('merge2');
 var mocha = require('gulp-spawn-mocha');
 var spawn = require('child_process').spawn;
+var bunyan = require('bunyan');
 var mkdirp = require('mkdirp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
-var bunyan = require('bunyan');
-var nodemon = require('gulp-nodemon');
-
 var tslint = require('gulp-tslint');
+var nodemon = require('gulp-nodemon');
 
 var paths = {
     ts: ['ts/**/*.ts'],

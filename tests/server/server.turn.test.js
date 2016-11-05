@@ -3,7 +3,7 @@ var expect = require('chai').expect,
     BSData = require('../../src/release/definitions/bsdata'),
     Game = require('../../src/release/classes/game.class');
 
-describe('turn process for basic game', function () {
+describe('server.turn:', function () {
 
     var player1,
         player2,
@@ -12,7 +12,7 @@ describe('turn process for basic game', function () {
 
     var createMockPlayer = function (id) {
         return {
-            id: id,
+            bs_uuid: id,
             nickname: id,
             game: null,
             join: function () {},
@@ -135,7 +135,7 @@ describe('turn process for basic game', function () {
         expect(result.actions).to.have.length(3);
     });
 
-    it("should return the player's round score", function () {
+    it('should return the round score of the player', function () {
         game.map.max.action = 2;
 
         game.setNextActions(player1, [
@@ -159,7 +159,7 @@ describe('turn process for basic game', function () {
         expect(result.turnScores).to.not.have.property('player3');
     });
 
-    it("should mark a touched ship", function () {
+    it('should mark a touched ship', function () {
         game.map.max = {action: 2};
 
         game.setNextActions(player1, [
@@ -193,19 +193,22 @@ describe('turn process for basic game', function () {
         expect(result.turnScores.player2).to.have.property('miss').to.be.equal(1);
     });
 
-    it("should return information on all players", function () {
+    it('should return information on all players', function () {
         game.map.max = {action: 2};
 
         var playersInfos = game.getPlayersInfos();
 
+        expect(playersInfos[0]).to.have.property('id', 'player1');
         expect(playersInfos[0]).to.have.property('nickname', 'player1');
         expect(playersInfos[0]).to.have.property('score', 0);
         expect(playersInfos[0]).to.have.property('maxHealth', 2);
         expect(playersInfos[0]).to.have.property('health', 2);
+        expect(playersInfos[1]).to.have.property('id', 'player2');
         expect(playersInfos[1]).to.have.property('nickname', 'player2');
         expect(playersInfos[1]).to.have.property('score', 0);
         expect(playersInfos[1]).to.have.property('maxHealth', 2);
         expect(playersInfos[1]).to.have.property('health', 2);
+        expect(playersInfos[2]).to.have.property('id', 'player3');
         expect(playersInfos[2]).to.have.property('nickname', 'player3');
         expect(playersInfos[2]).to.have.property('score', 0);
         expect(playersInfos[2]).to.have.property('maxHealth', 2);
@@ -225,14 +228,17 @@ describe('turn process for basic game', function () {
 
         expect(result.players).to.have.length(3);
 
+        expect(result.players[0]).to.have.property('id', 'player1');
         expect(result.players[0]).to.have.property('nickname', 'player1');
         expect(result.players[0]).to.have.property('score', 1);
         expect(result.players[0]).to.have.property('health', 2);
 
+        expect(result.players[1]).to.have.property('id', 'player2');
         expect(result.players[1]).to.have.property('nickname', 'player2');
         expect(result.players[1]).to.have.property('score', 1);
         expect(result.players[1]).to.have.property('health', 2);
 
+        expect(result.players[2]).to.have.property('id', 'player3');
         expect(result.players[2]).to.have.property('nickname', 'player3');
         expect(result.players[2]).to.have.property('score', 0);
         expect(result.players[2]).to.have.property('health', 1);
@@ -248,14 +254,17 @@ describe('turn process for basic game', function () {
 
         result = game.playTheTurn();
 
+        expect(result.players[0]).to.have.property('id', 'player1');
         expect(result.players[0]).to.have.property('nickname', 'player1');
         expect(result.players[0]).to.have.property('score', 2);
         expect(result.players[0]).to.have.property('health', 2);
 
+        expect(result.players[1]).to.have.property('id', 'player2');
         expect(result.players[1]).to.have.property('nickname', 'player2');
         expect(result.players[1]).to.have.property('score', 1);
         expect(result.players[1]).to.have.property('health', 1);
 
+        expect(result.players[2]).to.have.property('id', 'player3');
         expect(result.players[2]).to.have.property('nickname', 'player3');
         expect(result.players[2]).to.have.property('score', 0);
         expect(result.players[2]).to.have.property('health', 1);
