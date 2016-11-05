@@ -3,6 +3,7 @@
 module BSData {
     export enum State { READY, PLAYING, SETTING, WAITING_PLAYERS }
     export enum ActionType { BOMB }
+    export enum ShipType { CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER }
 
     export let events = {
         on: {

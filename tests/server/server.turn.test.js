@@ -10,14 +10,6 @@ describe('turn process for basic game', function () {
         player3,
         game;
 
-    var Ships = {
-        carrier: 5,
-        battleship: 4,
-        cruiser: 3,
-        submarine: 3,
-        destroyer: 2
-    };
-
     var createMockPlayer = function (id) {
         return {
             id: id,
@@ -34,7 +26,7 @@ describe('turn process for basic game', function () {
             y: y,
             width: 2,
             height: 1,
-            type: 'destroyer'
+            type: BSData.ShipType.DESTROYER
         };
     };
 
@@ -50,7 +42,7 @@ describe('turn process for basic game', function () {
         game = new Game('test', 3);
         game.map.width = 10;
         game.map.height = 10;
-        game.ship = {destroyer : 1};
+        game.map.ships = [{type: BSData.ShipType.DESTROYER, amount: 1}];
         player1 = createMockPlayer('player1');
         game.addPlayer(player1);
         player2 = createMockPlayer('player2');
@@ -60,13 +52,14 @@ describe('turn process for basic game', function () {
         game.setPlayerReady(player1, true);
         game.setPlayerReady(player2, true);
         game.setPlayerReady(player3, true);
-        game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
+        var a = game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
         game.placePlayerShips(player2, [makeDestroyer(1, 1)]);
         game.placePlayerShips(player3, [makeDestroyer(2, 2)]);
     });
 
     it('should save all the players actions during the turn', function () {
-        game.map.max = {action: 1};
+        game.map.max.action = 1;
+        game.map.max.other = [];
 
         expect(game.actions).to.deep.equal({});
 

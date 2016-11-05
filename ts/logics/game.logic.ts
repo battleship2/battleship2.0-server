@@ -183,16 +183,21 @@ function _mapDimensionsAreValid(map: BSMap): boolean {
 function _hasAllExpectedShips(map: BSMap, ships: Array<BSShip>): boolean {
     try {
         let check = {};
-        _utils.forEach(map.ships, (ship: BSShip, type: string) => {
-            check[type] = { expected: ship };
+        _utils.forEach(map.ships, (ship: BSShipAmount) => {
+            if (!_utils.isDefined(check[ship.type])) {
+                check[ship.type] = {
+                    expected: 0,
+                    result: 0
+                };
+            }
+            check[ship.type].expected += ship.amount;
         });
 
         _utils.forEach(ships, (ship: BSShip) => {
             if (_utils.isUndefined(check[ship.type])) {
                 throw new Error();
             }
-            let result = check[ship.type].result;
-            check[ship.type].result = _utils.isDefined(result) ? result + 1 : 1;
+            check[ship.type].result += 1;
         });
 
         _utils.forEach(check, element => {

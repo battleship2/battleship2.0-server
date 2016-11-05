@@ -14,7 +14,10 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public map: BSMap = { max: {action: 1, other: []}, ships: {}, width: 10, height: 10, boards: {} };
+    public map: BSMap = {
+        max: {action: 1, other: []},
+        ships: [{type: BSData.ShipType.DESTROYER, amount: 1}],
+        width: 10, height: 10, boards: {} };
     public name: string = '';
     public logic: GameLogic = new GameLogic();
     public players: { [nickname: string]: BSPlayer } = {};

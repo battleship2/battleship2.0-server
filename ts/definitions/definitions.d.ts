@@ -32,6 +32,7 @@ declare module SocketIO  {
 declare module BSData {
     enum State { READY, PLAYING, SETTING, WAITING_PLAYERS }
     enum ActionType { BOMB }
+    enum ShipType { CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER }
 }
 
 /**********************************************************************************/
@@ -83,7 +84,7 @@ interface BSShip {
     y: number
     id: string
     hits: Array<BSCoordinates>
-    type: string
+    type: BSData.ShipType
     width: number
     height: number
     destroyed: boolean
@@ -103,7 +104,7 @@ interface BSMap {
         action: number
         other: Array<BSActionAmount>
     }
-    ships: {}
+    ships: Array<BSShipAmount>
     width: number
     height: number
     boards: { [nickname: string]: BSMapBoard }
@@ -131,5 +132,10 @@ interface BSScore {
 
 interface BSActionAmount {
     type: BSData.ActionType
+    amount: number
+}
+
+interface BSShipAmount {
+    type: BSData.ShipType
     amount: number
 }
