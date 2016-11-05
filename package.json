@@ -1,45 +1,47 @@
 {
-    "name": "battleship2.0-server",
-    "description": "Server for BattleShip \"Touché Coulé\" game",
-    "repository": "https://github.com/battleship2/battleship2.0-server",
-    "version": "1.0.0",
-    "devDependencies": {
-        "@types/bunyan": "0.0.31",
-        "@types/node": "^6.0.46",
-        "@types/restify": "^2.0.34",
-        "@types/socket.io": "^1.4.27",
-        "chai": "^3.5.0",
-        "del": "^2.2.2",
-        "gulp": "github:gulpjs/gulp#4.0",
-        "gulp-concat": "^2.6.0",
-        "gulp-mocha": "^3.0.1",
-        "gulp-nodemon": "^2.2.1",
-        "gulp-rename": "^1.2.2",
-        "gulp-typescript": "^3.0.2",
-        "gulp-uglify": "^2.0.0",
-        "gulp-zip": "^3.2.0",
-        "merge2": "^1.0.2",
-        "mkdirp": "^0.5.1",
-        "sinon": "^1.17.6",
-        "typescript": "^2.0.3",
-        "socket.io-client": "^1.5.1"
-    },
-    "author": "Raphaël MARQUES <work.rmarques@gmail.com> (https://github.com/Adrael)",
-    "contributors": [
-        "Damien GABRIELLE <damiengabrielle@gmail.com> (https://github.com/eptwalabha)"
-    ],
-    "license": "MIT",
-    "engines": {
-        "node": ">=6.6.0"
-    },
-    "scripts": {
-        "test": "gulp test",
-        "start": "gulp serve"
-    },
-    "dependencies": {
-        "bunyan": "^1.8.4",
-        "restify": "^4.1.1",
-        "socket.io": "^1.4.8"
-    },
-    "optionalDependencies": {}
+  "name": "battleship2.0-server",
+  "description": "Server for BattleShip \"Touché Coulé\" game",
+  "repository": "https://github.com/battleship2/battleship2.0-server",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@types/bunyan": "0.0.31",
+    "@types/node": "^6.0.46",
+    "@types/restify": "^2.0.34",
+    "@types/socket.io": "^1.4.27",
+    "chai": "^3.5.0",
+    "del": "^2.2.2",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-mocha": "^3.0.1",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-tslint": "^6.1.3",
+    "gulp-typescript": "^3.0.2",
+    "gulp-uglify": "^2.0.0",
+    "gulp-zip": "^3.2.0",
+    "merge2": "^1.0.2",
+    "mkdirp": "^0.5.1",
+    "sinon": "^1.17.6",
+    "socket.io-client": "^1.5.1",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.7"
+  },
+  "author": "Raphaël MARQUES <work.rmarques@gmail.com> (https://github.com/Adrael)",
+  "contributors": [
+    "Damien GABRIELLE <damiengabrielle@gmail.com> (https://github.com/eptwalabha)"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.6.0"
+  },
+  "scripts": {
+    "test": "gulp test",
+    "start": "gulp serve"
+  },
+  "dependencies": {
+    "bunyan": "^1.8.4",
+    "restify": "^4.1.1",
+    "socket.io": "^1.4.8"
+  },
+  "optionalDependencies": {}
 }

@@ -1,18 +1,23 @@
 var expect = require('chai').expect,
     restify = require('restify'),
-    socket = require('../../src/release/classes/socket.class'),
     SocketClass = require('../../src/release/classes/socket.class'),
     ServerClass = require('../../src/release/classes/server.class'),
-    io = require('socket.io'),
     ioClient = require('socket.io-client');
+
+require('events').EventEmitter.prototype._maxListeners = 100;
 
 describe('chat', function () {
 
-    var server,
+    var server, socket,
         clientA, clientB, clientC,
         port = 9000,
         url = 'http://localhost:' + port;
 
+    function _clean(client) {
+        client.off();
+        client.disconnect();
+        client.destroy();
+    }
 
     beforeEach(function (done) {
         server = new ServerClass();
@@ -21,16 +26,16 @@ describe('chat', function () {
         socket.init(server.get());
         server.start(port);
 
-        clientA = ioClient.connect(url);
-        clientB = ioClient.connect(url);
-        clientC = ioClient.connect(url);
+        clientA = ioClient(url);
+        clientB = ioClient(url);
+        clientC = ioClient(url);
         done();
     });
 
     afterEach(function () {
-        clientA.disconnect();
-        clientB.disconnect();
-        clientC.disconnect();
+        _clean(clientA);
+        _clean(clientB);
+        _clean(clientC);
         server.close();
     });
 

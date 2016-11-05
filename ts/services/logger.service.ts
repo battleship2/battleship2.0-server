@@ -1,8 +1,8 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
-import Utils = require('../services/utils.service');
-import Bunyan = require('bunyan');
-import Restify = require('restify');
+import Utils = require("../services/utils.service");
+import Bunyan = require("bunyan");
+import Restify = require("restify");
 
 let _utils: Utils = new Utils();
 let _logger: Bunyan.Logger = null;
@@ -37,52 +37,52 @@ class Logger {
             let _restify: any = Restify;
 
             _logger = new _bunyan({
-                name: 'battleship-server-logger',
+                name: "battleship-server-logger",
                 streams: [
                     {
                         stream: process.stdout,
-                        level: 'debug'
+                        level: "debug"
                     },
                     {
-                        type: 'rotating-file',
-                        path: 'logs/server-info.log',
-                        level: 'info',
-                        period: '1d',   // daily rotation
+                        type: "rotating-file",
+                        path: "logs/server-info.log",
+                        level: "info",
+                        period: "1d",   // daily rotation
                         count: 10        // keep 10 back copies
                     },
                     {
-                        type: 'rotating-file',
-                        path: 'logs/server-warn.log',
-                        level: 'warn',
-                        period: '1d',   // daily rotation
+                        type: "rotating-file",
+                        path: "logs/server-warn.log",
+                        level: "warn",
+                        period: "1d",   // daily rotation
                         count: 10        // keep 10 back copies
                     },
                     {
-                        type: 'rotating-file',
-                        path: 'logs/server-trace.log',
-                        level: 'trace',
-                        period: '1d',   // daily rotation
+                        type: "rotating-file",
+                        path: "logs/server-trace.log",
+                        level: "trace",
+                        period: "1d",   // daily rotation
                         count: 10        // keep 10 back copies
                     },
                     {
-                        type: 'rotating-file',
-                        path: 'logs/server-debug.log',
-                        level: 'debug',
-                        period: '1d',   // daily rotation
+                        type: "rotating-file",
+                        path: "logs/server-debug.log",
+                        level: "debug",
+                        period: "1d",   // daily rotation
                         count: 10        // keep 10 back copies
                     },
                     {
-                        type: 'rotating-file',
-                        path: 'logs/server-error.log',
-                        level: 'error',
-                        period: '1d',   // daily rotation
+                        type: "rotating-file",
+                        path: "logs/server-error.log",
+                        level: "error",
+                        period: "1d",   // daily rotation
                         count: 10        // keep 10 back copies
                     },
                     {
-                        type: 'rotating-file',
-                        path: 'logs/server-fatal.log',
-                        level: 'fatal',
-                        period: '1d',   // daily rotation
+                        type: "rotating-file",
+                        path: "logs/server-fatal.log",
+                        level: "fatal",
+                        period: "1d",   // daily rotation
                         count: 10        // keep 10 back copies
                     }
                 ],

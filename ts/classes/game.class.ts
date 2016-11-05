@@ -1,8 +1,8 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
-import Utils = require('../services/utils.service');
-import BSData = require('../definitions/bsdata');
-import GameLogic = require('../logics/game.logic');
+import Utils = require("../services/utils.service");
+import BSData = require("../definitions/bsdata");
+import GameLogic = require("../logics/game.logic");
 
 let _utils: Utils = new Utils();
 
@@ -14,18 +14,15 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public map: BSMap = {
-        max: {action: 1, other: []},
-        ships: [{type: BSData.ShipType.DESTROYER, amount: 1}],
-        width: 10, height: 10, boards: {} };
-    public name: string = '';
+    public map: BSMap = { max: {action: 1, other: []}, ships: [], width: 10, height: 10, boards: {} };
+    public name: string = "";
     public logic: GameLogic = new GameLogic();
-    public players: { [nickname: string]: BSPlayer } = {};
-    public actions: { [nickname: string]: Array<BSAction> } = {};
-    public history: Array<{ [nickname: string]: Array<BSAction> }> = [];
-    public password: string = '';
+    public players: BSPlayerRegistry = {};
+    public actions: BSActionRegistry = {};
+    public history: Array<BSActionRegistry> = [];
+    public password: string = "";
     public maxPlayers: number = 4;
-    public socketRoomName: string = 'UNNAMED';
+    public socketRoomName: string = "UNNAMED";
 
     private _id: string = _utils.uuid();
     private _state: BSData.State = BSData.State.WAITING_PLAYERS;
@@ -36,11 +33,12 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    constructor(name: string, maxPlayers: number, password: string = '') {
+    constructor(name: string, maxPlayers: number, password: string = "") {
+        this.map.ships.push({type: BSData.ShipType.DESTROYER, amount: 1});
         this.name = name;
         this.password = password;
         this.maxPlayers = maxPlayers >= 2 && maxPlayers <= 10 ? maxPlayers : 4;
-        this.socketRoomName = '/game/' + this._id + '-' + this.name;
+        this.socketRoomName = "/game/" + this._id + "-" + this.name;
     }
 
     /**********************************************************************************/
@@ -149,7 +147,7 @@ class Game {
         this.actions[socket.nickname] = [];
 
         _utils.forEach(actions, (action: BSAction, index: string) => {
-            action.id = socket.nickname + '-action-' + index;
+            action.id = socket.nickname + "-action-" + index;
             action.owner = socket.nickname;
             this.actions[socket.nickname].push(action);
         });
@@ -174,7 +172,7 @@ class Game {
             this.map.boards[socket.nickname].ships = {};
 
             _utils.forEach(ships, (ship: BSShip, index: string) => {
-                ship.id = socket.nickname + '-ship-' + index;
+                ship.id = socket.nickname + "-ship-" + index;
                 ship.hits = [];
                 this.map.boards[socket.nickname].ships[ship.id] = ship;
             });
@@ -218,14 +216,14 @@ class Game {
             score: 0
         };
         socket.join(this.socketRoomName);
-        socket.leave('lobby');
+        socket.leave("lobby");
         socket.game = this._id;
         _updateState.call(this);
         return this;
     };
 
     public removePlayer = (socket: SocketIO.Socket) : Game => {
-        socket.join('lobby');
+        socket.join("lobby");
         socket.leave(this.socketRoomName);
         socket.game = null;
         delete this.players[socket.nickname];
@@ -233,7 +231,7 @@ class Game {
         return this;
     };
 
-    public removeAllPlayers = (sockets: { [nickname: string]: SocketIO.Socket }) : Game => {
+    public removeAllPlayers = (sockets: BSSocketRegistry) : Game => {
         let self = this;
         _utils.forEach(sockets, (socket: SocketIO.Socket) => {
             self.removePlayer(socket);
@@ -292,8 +290,8 @@ function _areAllPlayersReady(): boolean {
     return true;
 }
 
-function _getTurnScores(actions: Array<BSAction>): { [owner: string]: BSScore } {
-    let scores: { [owner: string]: BSScore } = {};
+function _getTurnScores(actions: Array<BSAction>): BSScoreRegistry {
+    let scores: BSScoreRegistry = {};
 
     _utils.forEach(actions, (action: BSAction) => {
         let owner = action.owner;
@@ -303,7 +301,7 @@ function _getTurnScores(actions: Array<BSAction>): { [owner: string]: BSScore } 
 
         let missed = true;
         _utils.forEach(action.result, (result: BSTurnResult) => {
-            if (result.type === 'hit ship') {
+            if (result.type === "hit ship") {
                 missed = false;
                 scores[owner].score += 1;
             }
@@ -322,7 +320,7 @@ function _updateBoards(actions: Array<BSAction>): Game {
         }
 
         _utils.forEach(action.result, (result: BSTurnResult) => {
-            if (result.type === 'hit ship') {
+            if (result.type === "hit ship") {
                 let owner = result.owner;
                 let target = result.target;
                 let ship = this.map.boards[owner].ships[target];
@@ -349,7 +347,7 @@ function _updateBoards(actions: Array<BSAction>): Game {
     return this;
 }
 
-function _updatePlayersInfos(scores: { [owner: string]: BSScore }): Game {
+function _updatePlayersInfos(scores: BSScoreRegistry): Game {
     _utils.forEach(scores, (score: BSScore, owner: string) => {
         this.players[owner].score += score.score;
     });

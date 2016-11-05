@@ -15,24 +15,24 @@
 /*                                                                                */
 /**********************************************************************************/
 
-declare module NodeJS  {
+declare namespace NodeJS  {
     interface Global {
-        DEBUG_ENABLED: boolean
+        DEBUG_ENABLED: boolean;
     }
 }
 
-declare module SocketIO  {
+declare namespace SocketIO  {
     interface Socket {
-        id: string
-        game: string
-        nickname: string
+        id: string;
+        game: string;
+        nickname: string;
     }
 }
 
-declare module BSData {
-    enum State { READY, PLAYING, SETTING, WAITING_PLAYERS }
-    enum ActionType { BOMB }
-    enum ShipType { CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER }
+declare namespace BSData {
+    enum State {}
+    enum ShipType {}
+    enum ActionType {}
 }
 
 /**********************************************************************************/
@@ -42,100 +42,130 @@ declare module BSData {
 /**********************************************************************************/
 
 interface BSGameData {
-    id: string
-    name: string
-    gameId: string
-    password: string
-    maxPlayers: number
+    id: string;
+    name: string;
+    gameId: string;
+    password: string;
+    maxPlayers: number;
 }
 
 interface BSGameSummary {
-    id: string
-    name: string
-    players: number
-    password: boolean
-    maxPlayers: number
+    id: string;
+    name: string;
+    players: number;
+    password: boolean;
+    maxPlayers: number;
 }
 
 interface BSBuffer {
-    games: { [gameId: string]: any } // Cannot reference Game here
-    sockets: { [nickname: string]: SocketIO.Socket }
+    games: BSGameRegistry;
+    sockets: BSSocketRegistry;
 }
 
 interface BSPlayer {
-    score: number
-    isReady: boolean
+    score: number;
+    isReady: boolean;
 }
 
 interface BSPlayerInfo {
-    score: number
-    health: number
-    nickname: string
-    maxHealth: number
+    score: number;
+    health: number;
+    nickname: string;
+    maxHealth: number;
 }
 
 interface BSCoordinates {
-    x: number
-    y: number
+    x: number;
+    y: number;
 }
 
 interface BSShip {
-    x: number
-    y: number
-    id: string
-    hits: Array<BSCoordinates>
-    type: BSData.ShipType
-    width: number
-    height: number
-    destroyed: boolean
+    x: number;
+    y: number;
+    id: string;
+    hits: Array<BSCoordinates>;
+    type: BSData.ShipType;
+    width: number;
+    height: number;
+    destroyed: boolean;
 }
 
 interface BSAction {
-    x: number
-    y: number
-    id: string
-    type: BSData.ActionType
-    owner: string
-    result: Array<BSTurnResult>
+    x: number;
+    y: number;
+    id: string;
+    type: BSData.ActionType;
+    owner: string;
+    result: Array<BSTurnResult>;
 }
 
 interface BSMap {
     max: {
-        action: number
-        other: Array<BSActionAmount>
-    }
-    ships: Array<BSShipAmount>
-    width: number
-    height: number
-    boards: { [nickname: string]: BSMapBoard }
+        action: number;
+        other: Array<BSActionAmount>;
+    };
+    ships: Array<BSShipAmount>;
+    width: number;
+    height: number;
+    boards: BSMapBoardRegistry;
 }
 
 interface BSMapBoard {
-    ships?: { [shipId: string]: BSShip }
-}
-
-interface BsMapBoardToString {
-    [nickname: string]: BSMapBoard
+    ships?: BSShipRegistry;
 }
 
 interface BSTurnResult {
-    type: string
-    owner: string
-    target: string
-    localHit: BSCoordinates
+    type: string;
+    owner: string;
+    target: string;
+    localHit: BSCoordinates;
 }
 
 interface BSScore {
-    miss: number
-    score: number
+    miss: number;
+    score: number;
 }
 
 interface BSActionAmount {
-    type: BSData.ActionType
-    amount: number
+    type: BSData.ActionType;
+    amount: number;
 }
 
 interface BSShipAmount {
-    type: BSData.ShipType
-    amount: number
+    type: BSData.ShipType;
+    amount: number;
+}
+
+/**********************************************************************************/
+/*                                                                                */
+/*                                    REGISTRIES                                  */
+/*                                                                                */
+/**********************************************************************************/
+
+interface BSShipRegistry {
+    [shipId: string]: BSShip;
+}
+
+interface BSActionRegistry {
+    [nickname: string]: Array<BSAction>;
+}
+
+interface BSMapBoardRegistry {
+    [nickname: string]: BSMapBoard;
+}
+
+interface BSSocketRegistry {
+    [nickname: string]: SocketIO.Socket;
+}
+
+interface BSPlayerRegistry {
+    [nickname: string]: BSPlayer;
+}
+
+interface BSScoreRegistry {
+    [owner: string]: BSScore;
+}
+
+interface BSGameRegistry {
+    [gameId: string]: any; // Cannot reference Game here
 }

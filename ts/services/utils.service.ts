@@ -40,12 +40,12 @@ class Utils {
      * @returns {String} The UUID.
      */
     public uuid = (): string => {
-        var time = new Date().getTime() + process.hrtime()[0];
+        let time = new Date().getTime() + process.hrtime()[0];
 
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char: string) => {
-            var r = (time + Math.random() * 16) % 16 | 0;
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (char: string) => {
+            let r = (time + Math.random() * 16) % 16 | 0;
             time = Math.floor(time / 16);
-            return (char === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            return (char === "x" ? r : (r & 0x3 | 0x8)).toString(16);
         });
     };
 
@@ -60,7 +60,7 @@ class Utils {
      * @returns {Boolean} True if `value` is `null`.
      */
     public isNull = (value: any): boolean => {
-        return value === null && typeof value === 'object';
+        return value === null && typeof value === "object";
     };
 
     /**
@@ -74,7 +74,7 @@ class Utils {
      * @returns {Boolean} True if `value` is a `String`.
      */
     public isString = (value: any): boolean => {
-        return typeof value === 'string';
+        return typeof value === "string";
     };
 
     /**
@@ -88,7 +88,7 @@ class Utils {
      * @returns {Boolean} True if `value` is undefined.
      */
     public isUndefined = (value: any): boolean => {
-        return typeof value === 'undefined';
+        return typeof value === "undefined";
     };
 
     /**
@@ -102,7 +102,7 @@ class Utils {
      * @returns {Boolean} True if `value` is defined.
      */
     public isDefined = (value: any): boolean => {
-        return typeof value !== 'undefined';
+        return typeof value !== "undefined";
     };
 
     /**
@@ -117,7 +117,7 @@ class Utils {
      * @returns {Boolean} True if `value` is an `Object` but not `null`.
      */
     public isObject = (value: any): boolean => {
-        return value !== null && typeof value === 'object';
+        return value !== null && typeof value === "object";
     };
 
     /**
@@ -130,14 +130,14 @@ class Utils {
      * This includes the "special" numbers `NaN`, `+Infinity` and `-Infinity`.
      *
      * If you wish to exclude these then you can use the native
-     * [`isFinite'](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isFinite)
+     * [`isFinite"](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/isFinite)
      * method.
      *
      * @param {*} value Reference to check.
      * @returns {Boolean} True if `value` is a `Number`.
      */
     public isNumber = (value: any): boolean => {
-        return typeof value === 'number';
+        return typeof value === "number";
     };
 
     /**
@@ -151,7 +151,7 @@ class Utils {
      * @returns {Boolean} True if `value` is a `Date`.
      */
     public isDate = (value: any): boolean => {
-        return Object.prototype.toString.call(value) === '[object Date]';
+        return Object.prototype.toString.call(value) === "[object Date]";
     };
 
     /**
@@ -179,7 +179,7 @@ class Utils {
      * @returns {Boolean} True if `value` is a `Function`.
      */
     public isFunction = (value: any): boolean => {
-        return typeof value === 'function';
+        return typeof value === "function";
     };
 
     /**
@@ -209,7 +209,7 @@ class Utils {
      * @returns {Boolean} True if `value` is a `RegExp`.
      */
     public isRegExp = (value: any): boolean => {
-        return toString.call(value) === '[object RegExp]';
+        return toString.call(value) === "[object RegExp]";
     };
 
     /**
@@ -238,7 +238,7 @@ class Utils {
      * @return {Object} { width, height }
      */
     public getAspectRatioFit = (srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number): {ratio: number, width: number, height: number} => {
-        var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+        let ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
         return {ratio: ratio, width: srcWidth * ratio, height: srcHeight * ratio};
     };
 
@@ -249,7 +249,7 @@ class Utils {
      * @description
      * Extends the destination object `dst` by copying own enumerable properties from the `src` object(s)
      * to `dst`. You can specify multiple `src` objects. If you want to preserve original objects, you can do so
-     * by passing an empty object as the target: `var object = extend({}, object1, object2)`.
+     * by passing an empty object as the target: `let object = extend({}, object1, object2)`.
      *
      * **Note:** Keep in mind that `extend` does not support recursive merge (deep copy). Use
      * {@link merge} for _instance.
@@ -270,7 +270,7 @@ class Utils {
      * @description
      * Deeply extends the destination object `dst` by copying own enumerable properties from the `src` object(s)
      * to `dst`. You can specify multiple `src` objects. If you want to preserve original objects, you can do so
-     * by passing an empty object as the target: `var object = merge({}, object1, object2)`.
+     * by passing an empty object as the target: `let object = merge({}, object1, object2)`.
      *
      * Unlike {@link extend extend()}, `merge()` recursively descends into object properties of source
      * objects, performing a deep copy.
@@ -296,9 +296,9 @@ class Utils {
      * It is worth noting that `forEach` does not iterate over inherited properties because it filters
      * using the `hasOwnProperty` method.
      *
-     * Unlike ES262's
+     * Unlike ES262"s
      * [Array.prototype.forEach](http://www.ecma-international.org/ecma-262/5.1/#sec-15.4.4.18),
-     * providing 'undefined' or 'null' values for `obj` will not throw a TypeError, but rather just
+     * providing "undefined" or "null" values for `obj` will not throw a TypeError, but rather just
      * return the value provided.
      *
      * @param {Object|Array} obj Object to iterate over.
@@ -308,21 +308,21 @@ class Utils {
      */
     public forEach = (obj: any, iterator: Function, context?: Object): Object => {
 
-        var key, length;
+        let key, length;
 
         if (obj) {
 
             if (_instance.isFunction(obj)) {
 
                 for (key in obj) {
-                    if (key !== 'prototype' && key !== 'length' && key !== 'name' && obj.hasOwnProperty(key)) {
+                    if (key !== "prototype" && key !== "length" && key !== "name" && obj.hasOwnProperty(key)) {
                         iterator.call(context, obj[key], key, obj);
                     }
                 }
 
             } else if (_instance.isArray(obj) || _isArrayLike(obj)) {
 
-                var isPrimitive = typeof obj !== 'object';
+                let isPrimitive = typeof obj !== "object";
                 for (key = 0, length = obj.length; key < length; key++) {
                     if (isPrimitive || key in obj) {
                         iterator.call(context, obj[key], key, obj);
@@ -340,7 +340,7 @@ class Utils {
                     iterator.call(context, obj[key], key, obj);
                 }
 
-            } else if (typeof obj.hasOwnProperty === 'function') {
+            } else if (typeof obj.hasOwnProperty === "function") {
 
                 // Slow path for objects inheriting Object.prototype, hasOwnProperty check needed
                 for (key in obj) {
@@ -382,18 +382,18 @@ class Utils {
  */
 function _baseExtend(dst: Object, objs: any, deep: boolean): Object {
 
-    for (var i = 0, ii = objs.length; i < ii; ++i) {
+    for (let i = 0, ii = objs.length; i < ii; ++i) {
 
-        var obj = objs[i];
+        let obj = objs[i];
 
         if (!_instance.isObject(obj) && !_instance.isFunction(obj)) continue;
 
-        var keys = Object.keys(obj);
+        let keys = Object.keys(obj);
 
-        for (var j = 0, jj = keys.length; j < jj; j++) {
+        for (let j = 0, jj = keys.length; j < jj; j++) {
 
-            var key = keys[j];
-            var src = obj[key];
+            let key = keys[j];
+            let src = obj[key];
 
             if (deep && _instance.isObject(src)) {
 
@@ -444,12 +444,12 @@ function _isArrayLike(obj: any): boolean {
 
     // Support: iOS 8.2 (not reproducible in simulator)
     // "length" in obj used to prevent JIT error (gh-11508)
-    var length = 'length' in Object(obj) && obj.length;
+    let length = "length" in Object(obj) && obj.length;
 
     // NodeList objects (with `item` method) and
     // other objects with suitable length characteristics are array-like
     return _instance.isNumber(length) &&
-        (length >= 0 && ((length - 1) in obj || obj instanceof Array) || typeof obj.item === 'function');
+        (length >= 0 && ((length - 1) in obj || obj instanceof Array) || typeof obj.item === "function");
 
 }
 
@@ -472,7 +472,7 @@ function _isWindow(obj: any): boolean {
  * Determine if a value is an object with a null prototype
  */
 function _isBlankObject(value: any): boolean {
-    return value !== null && typeof value === 'object' && !Object.getPrototypeOf(value);
+    return value !== null && typeof value === "object" && !Object.getPrototypeOf(value);
 }
 
 export = Utils;

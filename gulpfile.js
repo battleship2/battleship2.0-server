@@ -12,14 +12,15 @@ var gulp = require('gulp');
 var path = require('path');
 var merge = require('merge2');
 var mocha = require('gulp-mocha');
+var spawn = require('child_process').spawn;
 var mkdirp = require('mkdirp');
 var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
+var bunyan = require('bunyan');
 var nodemon = require('gulp-nodemon');
 
-var spawn = require('child_process').spawn;
-var bunyan = require('bunyan');
+var tslint = require('gulp-tslint');
 
 var paths = {
     ts: ['ts/**/*.ts'],
@@ -33,17 +34,16 @@ var paths = {
 /*                                                                                */
 /**********************************************************************************/
 
-gulp.task('ts', gulp.series(_ts));
 gulp.task('zip', gulp.series(_zip));
 gulp.task('mkdirp', gulp.series(_mkdirp));
+gulp.task('tslint', gulp.series(_tslint));
 gulp.task('scratch', gulp.series(_scratch));
 
+gulp.task('ts', gulp.series('tslint', _ts));
 gulp.task('hook', gulp.series('ts', _hook));
+gulp.task('test', gulp.series('scratch', 'mkdirp', 'ts', _test));
 gulp.task('serve', gulp.series('mkdirp', 'ts', _serve));
 gulp.task('minify', gulp.series('hook', _minify));
-
-gulp.task('test', gulp.series('scratch', 'mkdirp', 'ts', _test));
-gulp.task('test-watched', gulp.series('scratch', 'mkdirp', 'ts', _testWatched));
 
 gulp.task('build', gulp.series('scratch', 'minify', 'zip'));
 gulp.task('default', gulp.series('scratch', 'serve'));
@@ -53,6 +53,15 @@ gulp.task('default', gulp.series('scratch', 'serve'));
 /*                                     HOOKS                                      */
 /*                                                                                */
 /**********************************************************************************/
+
+function _tslint(done) {
+    return gulp.src(paths.ts)
+        .pipe(tslint({
+            formatter: 'verbose',
+            configuration: 'tslint.json'
+        }))
+        .pipe(tslint.report())
+}
 
 function _mkdirp(done) {
     mkdirp.sync('logs');
@@ -205,11 +214,6 @@ function _serve(done) {
         this.stderr.pipe(bunyan.stdin);
     });
 
-    return done();
-}
-
-function _testWatched(done) {
-    gulp.watch(paths.tests, gulp.series('test'));
     return done();
 }
 

@@ -1,9 +1,9 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
-import * as http from 'http';
-import Utils = require('../services/utils.service');
-import Logger = require('../services/logger.service');
-import Restify = require('restify');
+import * as http from "http";
+import Utils = require("../services/utils.service");
+import Logger = require("../services/logger.service");
+import Restify = require("restify");
 
 let _utils: Utils = new Utils();
 let _server: Restify.Server = null;
@@ -34,8 +34,8 @@ class Server {
 
             _server = Restify.createServer({
                 log: _logger.get(),
-                name: 'battleship-server',
-                version: '0.0.1'
+                name: "battleship-server",
+                version: "0.0.1"
             });
         }
 
@@ -54,7 +54,7 @@ class Server {
 
     public start = (port: number = 9001) : Server => {
         _server.listen(port, () => {
-            _logger.info('All the magic happens when', _server.name, 'is listening at', _server.url);
+            _logger.info("All the magic happens when", _server.name, "is listening at", _server.url);
         });
         return _instance;
     };

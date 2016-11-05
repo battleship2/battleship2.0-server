@@ -1,13 +1,13 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
-import * as http from 'http';
-import Game = require('./game.class');
-import Utils = require('../services/utils.service');
-import Logger = require('../services/logger.service');
-import BSData = require('../definitions/bsdata');
-import Nickname = require('../services/nickname.service');
+import * as http from "http";
+import Game = require("./game.class");
+import Utils = require("../services/utils.service");
+import Logger = require("../services/logger.service");
+import BSData = require("../definitions/bsdata");
+import Nickname = require("../services/nickname.service");
 
-let __io: SocketIOStatic = require('socket.io');
+let __io: SocketIOStatic = require("socket.io");
 let _io: SocketIO.Server = null;
 let _utils: Utils = new Utils();
 let _logger: Logger = null;
@@ -48,13 +48,13 @@ class Socket {
     public init = (server: http.Server): Socket => {
         _io = __io.listen(server);
 
-        _io.sockets.on('connection', (socket: SocketIO.Socket) => {
+        _io.sockets.on("connection", (socket: SocketIO.Socket) => {
             socket.game = null;
             socket.nickname = _getNickname();
 
             _buffer.sockets[socket.nickname] = socket;
 
-            socket.join('lobby');
+            socket.join("lobby");
             socket.emit(BSData.events.emit.NICKNAME, socket.nickname);
 
             // Player related events
@@ -108,7 +108,7 @@ function _message(socket: SocketIO.Socket, message: string): Socket {
         let game = _getGame(socket);
         game.emit(_io, BSData.events.emit.MESSAGE, messageData);
     } else {
-        _io.sockets.in('lobby').emit(BSData.events.emit.MESSAGE, messageData);
+        _io.sockets.in("lobby").emit(BSData.events.emit.MESSAGE, messageData);
     }
     return _instance;
 }
@@ -121,10 +121,10 @@ function _playTurn(socket: SocketIO.Socket, bomb: Array<BSAction>): Socket {
             if (game.hasEveryonePlayedTheTurn()) {
                 let results = game.playTheTurn();
                 game.emit(_io, BSData.events.emit.TURN_RESULTS, results);
-                game.emit(_io, BSData.events.emit.GAME_STATE, {state: 'new turn'});
+                game.emit(_io, BSData.events.emit.GAME_STATE, {state: "new turn"});
             }
         } else {
-            socket.emit(BSData.events.emit.PLAY_TURN, {error: 'Learn how to place a bomb.'});
+            socket.emit(BSData.events.emit.PLAY_TURN, {error: "Learn how to place a bomb."});
         }
     }
     return _instance;
@@ -137,14 +137,14 @@ function _placeShips(socket: SocketIO.Socket, ships: Array<BSShip>): Socket {
             if (game.placePlayerShips(socket, ships)) {
                 socket.emit(BSData.events.emit.SHIP_PLACEMENT, true);
                 if (game.state() === BSData.State.PLAYING) {
-                    game.emit(_io, BSData.events.emit.GAME_STATE, {state: 'new turn'});
+                    game.emit(_io, BSData.events.emit.GAME_STATE, {state: "new turn"});
                     game.emit(_io, BSData.events.emit.NEW_ROUND);
                 }
             } else {
-                socket.emit(BSData.events.emit.SHIP_PLACEMENT, {error: 'Learn how to place your ships.'});
+                socket.emit(BSData.events.emit.SHIP_PLACEMENT, {error: "Learn how to place your ships."});
             }
         } else {
-            socket.emit(BSData.events.emit.REFUSED, {message: 'It is not the moment to place your ship.'})
+            socket.emit(BSData.events.emit.REFUSED, {message: "It is not the moment to place your ship."});
         }
     }
     return _instance;
@@ -158,7 +158,7 @@ function _ready(socket: SocketIO.Socket, ready: boolean): Socket {
             game.emit(_io, BSData.events.emit.PLAYER_READY, {nickname: socket.nickname, isReady: ready});
             if (game.state() === BSData.State.SETTING) {
                 game.emit(_io, BSData.events.emit.GAME_STATE, {
-                    state: 'place ship',
+                    state: "place ship",
                     ships: game.map.ships
                 });
             }
@@ -190,7 +190,7 @@ function _leaveGame(socket: SocketIO.Socket): Socket {
         let playersCount = game.countPlayers();
         if (playersCount <= 0 || (game.state() === BSData.State.READY && !game.isStillPlayable())) {
             if (playersCount > 0) {
-                game.emit(_io, BSData.events.emit.GAME_STATE, {state: 'stopped'});
+                game.emit(_io, BSData.events.emit.GAME_STATE, {state: "stopped"});
                 game.removeAllPlayers(_buffer.sockets);
             }
             delete _buffer.games[game.getId()];
@@ -198,13 +198,13 @@ function _leaveGame(socket: SocketIO.Socket): Socket {
         }
 
     } else {
-        socket.emit(BSData.events.emit.REFUSED, {message: 'To leave a game, you first need to join one.'});
+        socket.emit(BSData.events.emit.REFUSED, {message: "To leave a game, you first need to join one."});
     }
     return _instance;
 }
 
 function _getNickname(): string {
-    let nickname = '';
+    let nickname = "";
     do { nickname = _nickname.get(); }
     while (nickname in _buffer.sockets);
     return nickname;
@@ -240,7 +240,7 @@ function _createGame(socket: SocketIO.Socket, data: BSGameData): Socket {
         _buffer.games[game.getId()] = game;
         socket.emit(BSData.events.emit.GAME_CREATED, game.summary());
     } else {
-        socket.emit(BSData.events.emit.REFUSED, {message: 'You already are in a game.'});
+        socket.emit(BSData.events.emit.REFUSED, {message: "You already are in a game."});
     }
     return _instance;
 }
@@ -252,13 +252,13 @@ function _joinGame(socket: SocketIO.Socket, data: BSGameData) {
             game.addPlayer(socket);
             game.emit(_io, BSData.events.emit.NEW_PLAYER, _playerData(socket));
             if (game.state() === BSData.State.READY) {
-                game.emit(_io, BSData.events.emit.GAME_STATE, {state: 'ready'});
+                game.emit(_io, BSData.events.emit.GAME_STATE, {state: "ready"});
             }
         } else {
-            socket.emit(BSData.events.emit.REFUSED, {message: 'It appears that you cannot join this game.'});
+            socket.emit(BSData.events.emit.REFUSED, {message: "It appears that you cannot join this game."});
         }
     } else {
-        socket.emit(BSData.events.emit.REFUSED, {message: 'No game found with id: ' + data.gameId});
+        socket.emit(BSData.events.emit.REFUSED, {message: "No game found with id: " + data.gameId});
     }
 }
 

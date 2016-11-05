@@ -1,7 +1,7 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
-import Utils = require('../services/utils.service');
-import BSData = require('../definitions/bsdata');
+import Utils = require("../services/utils.service");
+import BSData = require("../definitions/bsdata");
 
 let _utils: Utils = new Utils();
 let _instance: GameLogic = null;
@@ -45,7 +45,7 @@ class GameLogic {
             _actionsDoNotOverlap(map, actions);
     };
 
-    public processTurn = (playersActions: { [nickname: string]: Array<BSAction> }, map: BSMap): Array<BSAction> => {
+    public processTurn = (playersActions: BSActionRegistry, map: BSMap): Array<BSAction> => {
         let actionsResults: Array<BSAction> = [];
         _utils.forEach(playersActions, (actions: Array<BSAction>, nickname: string) => {
             _utils.forEach(actions, (action: BSAction) => {
@@ -63,7 +63,7 @@ class GameLogic {
 /*                                                                                */
 /**********************************************************************************/
 
-function _processAction(nickname: string, playerAction: BSAction, boards: BsMapBoardToString): BSAction {
+function _processAction(nickname: string, playerAction: BSAction, boards: BSMapBoardRegistry): BSAction {
     let action: BSAction = {
         x: playerAction.x,
         y: playerAction.y,
@@ -81,7 +81,7 @@ function _processAction(nickname: string, playerAction: BSAction, boards: BsMapB
     return action;
 }
 
-function _processBomb(nickname: string, bomb: BSAction, boards: BsMapBoardToString): Array<BSTurnResult> {
+function _processBomb(nickname: string, bomb: BSAction, boards: BSMapBoardRegistry): Array<BSTurnResult> {
     let result = [];
     _utils.forEach(boards, (board: BSMapBoard, player: string) => {
         if (player === nickname) {
@@ -92,7 +92,7 @@ function _processBomb(nickname: string, bomb: BSAction, boards: BsMapBoardToStri
             let hit = _colliding(bomb, ship);
             if (hit) {
                 result.push({
-                    type: 'hit ship',
+                    type: "hit ship",
                     owner: player,
                     target: ship.id,
                     localHit: hit

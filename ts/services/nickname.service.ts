@@ -1,6 +1,6 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
-import Utils = require('../services/utils.service');
+import Utils = require("../services/utils.service");
 
 let _utils: Utils = new Utils();
 let _words: { nouns: Array<string>, adjectives: Array<string> } = null;
@@ -27,53 +27,53 @@ class Nickname {
 
             _words = {
                 nouns: [
-                    'robin',
-                    'temper',
-                    'bubble',
-                    'play',
-                    'ladybug',
-                    'ear',
-                    'crack',
-                    'lunch',
-                    'weather',
-                    'pie',
-                    'treatment',
-                    'bike',
-                    'hour',
-                    'cactus',
-                    'argument',
-                    'turn',
-                    'amount',
-                    'things',
-                    'act',
-                    'mist',
-                    'digestion',
-                    'tray',
-                    'birthday',
-                    'war'
+                    "robin",
+                    "temper",
+                    "bubble",
+                    "play",
+                    "ladybug",
+                    "ear",
+                    "crack",
+                    "lunch",
+                    "weather",
+                    "pie",
+                    "treatment",
+                    "bike",
+                    "hour",
+                    "cactus",
+                    "argument",
+                    "turn",
+                    "amount",
+                    "things",
+                    "act",
+                    "mist",
+                    "digestion",
+                    "tray",
+                    "birthday",
+                    "war"
                 ],
 
                 adjectives: [
-                    'brilliant',
-                    'superb',
-                    'grotesque',
-                    'envious',
-                    'parabolic',
-                    'shiny',
-                    'gloomy',
-                    'speedy',
-                    'flippant',
-                    'maniacal',
-                    'changeable',
-                    'determined',
-                    'needy',
-                    'tart',
-                    'raspy',
-                    'purple',
-                    'psychedelic',
-                    'ossified',
-                    'kaput',
-                    'obedient'
+                    "brilliant",
+                    "superb",
+                    "grotesque",
+                    "envious",
+                    "parabolic",
+                    "shiny",
+                    "gloomy",
+                    "speedy",
+                    "flippant",
+                    "maniacal",
+                    "changeable",
+                    "determined",
+                    "needy",
+                    "tart",
+                    "raspy",
+                    "purple",
+                    "psychedelic",
+                    "ossified",
+                    "kaput",
+                    "obedient"
                 ]
             };
         }
@@ -88,7 +88,7 @@ class Nickname {
     /**********************************************************************************/
 
     public get = (): string => {
-        return _pickRandomWordIn(_words.adjectives) + ' ' + _pickRandomWordIn(_words.nouns);
+        return _pickRandomWordIn(_words.adjectives) + " " + _pickRandomWordIn(_words.nouns);
     };
 
 }
