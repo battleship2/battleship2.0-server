@@ -52,7 +52,7 @@ describe('turn process for basic game', function () {
         game.setPlayerReady(player1, true);
         game.setPlayerReady(player2, true);
         game.setPlayerReady(player3, true);
-        var a = game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
+        game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
         game.placePlayerShips(player2, [makeDestroyer(1, 1)]);
         game.placePlayerShips(player3, [makeDestroyer(2, 2)]);
     });
