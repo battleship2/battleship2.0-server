@@ -59,7 +59,9 @@ function _tslint() {
             formatter: 'verbose',
             configuration: 'tslint.json'
         }))
-        .pipe(tslint.report())
+        .pipe(tslint.report({
+            emitError: false
+        }));
 }
 
 function _mkdirp(done) {
