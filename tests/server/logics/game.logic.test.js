@@ -1,8 +1,10 @@
 var expect = require('chai').expect,
-    mechanics = require('../../../src/release/logics/game.logic');
+    GameLogic = require('../../../src/release/logics/game.logic'),
+    BSData = require('../../../src/release/definitions/bsdata');
 
 describe('basic game mechanics', function () {
 
+    var mechanics = new GameLogic();
     var ships = [],
         actions = [],
         map = {};
@@ -28,7 +30,7 @@ describe('basic game mechanics', function () {
 
     var makeBomb = function (x, y) {
         return {
-            type: 'bomb',
+            type: BSData.ActionType.BOMB,
             x: x,
             y: y
         };
@@ -187,12 +189,12 @@ describe('basic game mechanics', function () {
         });
 
         it('should be valid if the number of bombs does not exceed what is authorized', function () {
-            map.max.actions = 3;
+            map.max.action = 3;
             delete map.max.bomb;
             actions = [makeBomb(1, 1), makeBomb(2, 1), makeBomb(3, 1)];
             expect(isValid(map, actions)).to.be.true;
 
-            map.max.bomb = 2;
+            map.max.other = [{type: BSData.ActionType.BOMB, amount: 2}];
             expect(isValid(map, actions)).to.be.false;
             actions.pop();
             expect(isValid(map, actions)).to.be.true;
@@ -281,7 +283,7 @@ describe('basic game mechanics', function () {
             expect(action1.x).to.be.equal(0);
             expect(action1.y).to.be.equal(0);
             expect(action1.owner).to.be.equal('player1');
-            expect(action1.type).to.be.equal('bomb');
+            expect(action1.type).to.be.equal(BSData.ActionType.BOMB);
             expect(action1.result).to.deep.equal([{
                 type: 'hit ship',
                 localHit: {x: 0, y: 0},
@@ -293,7 +295,7 @@ describe('basic game mechanics', function () {
             expect(action2.x).to.be.equal(5);
             expect(action2.y).to.be.equal(5);
             expect(action2.owner).to.be.equal('player1');
-            expect(action2.type).to.be.equal('bomb');
+            expect(action2.type).to.be.equal(BSData.ActionType.BOMB);
             expect(action2.result).to.deep.equal([]);
 
             actions.player2 = [makeBomb(3, 3)];
@@ -305,7 +307,7 @@ describe('basic game mechanics', function () {
             expect(action3.x).to.be.equal(3);
             expect(action3.y).to.be.equal(3);
             expect(action3.owner).to.be.equal('player2');
-            expect(action3.type).to.be.equal('bomb');
+            expect(action3.type).to.be.equal(BSData.ActionType.BOMB);
             expect(action3.result).to.deep.equal([{
                 type: 'hit ship',
                 target: 'player1-ship-0',

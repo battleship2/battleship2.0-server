@@ -143,7 +143,7 @@ describe('turn process for basic game', function () {
     });
 
     it("should return the player's round score", function () {
-        game.map.max = {action: 2};
+        game.map.max.action = 2;
 
         game.setNextActions(player1, [
             makeBomb(5, 5), // miss

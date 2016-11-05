@@ -40,8 +40,7 @@ class GameLogic {
     };
 
     public isActionsValid = (map: BSMap, actions: Array<BSAction>): boolean => {
-        return actions.length <= map.max.action &&
-            _validNumberOfActions(map, actions) &&
+        return _validNumberOfActions(map, actions) &&
             _actionsWithinBoundaries(map, actions) &&
             _actionsDoNotOverlap(map, actions);
     };
@@ -161,15 +160,17 @@ function _actionWithinBoundaries(map: BSMap, action: BSAction): boolean {
 }
 
 function _validNumberOfActions(map: BSMap, actions: Array<BSAction>): boolean {
+    if (actions.length > map.max.action) return false;
+    let check = {};
     try {
-        let check = {};
         _utils.forEach(actions, (action: BSAction) => {
             let result = check[action.type];
             check[action.type] = _utils.isDefined(result) ? result + 1 : 1;
         });
 
-        _utils.forEach(check, (result, type) => {
-            if (_utils.isDefined(map.max[type]) && result > map.max[type]) throw new Error();
+        _utils.forEach(map.max.other, (action: BSActionAmount) => {
+            let counter = check[action.type];
+            if (_utils.isDefined(counter) && counter > action.amount) throw new Error();
         });
     } catch (exception) { return false; }
     return true;

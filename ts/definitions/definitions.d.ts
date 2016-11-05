@@ -99,7 +99,10 @@ interface BSAction {
 }
 
 interface BSMap {
-    max: { action: number }
+    max: {
+        action: number
+        other: Array<BSActionAmount>
+    }
     ships: {}
     width: number
     height: number
@@ -124,4 +127,9 @@ interface BSTurnResult {
 interface BSScore {
     miss: number
     score: number
+}
+
+interface BSActionAmount {
+    type: BSData.ActionType
+    amount: number
 }
