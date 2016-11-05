@@ -53,7 +53,7 @@ gulp.task('default', gulp.series('scratch', 'serve'));
 /*                                                                                */
 /**********************************************************************************/
 
-function _tslint(done) {
+function _tslint() {
     return gulp.src(paths.ts)
         .pipe(tslint({
             formatter: 'verbose',

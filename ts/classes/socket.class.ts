@@ -74,6 +74,8 @@ class Socket {
 
             // Chat related events
             socket.on(BSData.events.on.MESSAGE, _message.bind(_instance, socket));
+
+            _logger.debug("Socket connected [%s]: %s", socket.bs_uuid, socket.nickname);
         });
 
         return _instance;
