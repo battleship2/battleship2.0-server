@@ -3,6 +3,8 @@
 import Utils = require("../services/utils.service");
 import BSData = require("../definitions/bsdata");
 import GameLogic = require("../logics/game.logic");
+import Map = require("./map.class");
+import Ship = require("./entities/entity.ship.class");
 
 let _utils: Utils = new Utils();
 
@@ -14,7 +16,7 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public map: BSMap = { max: {action: 1, other: []}, ships: [], width: 10, height: 10, boards: {} };
+    public map: Map;
     public name: string = "";
     public logic: GameLogic = new GameLogic();
     public players: BSPlayerRegistry = {};
@@ -34,7 +36,9 @@ class Game {
     /**********************************************************************************/
 
     constructor(name: string, maxPlayers: number, password: string = "") {
-        this.map.ships.push({type: BSData.ShipType.DESTROYER, amount: 1});
+        this.map = new Map({x: 10, y: 10});
+        this.map.setActionsLimit(1, []);
+        this.map.setShips([{type: BSData.ShipType.DESTROYER, amount: 1}]);
         this.name = name;
         this.password = password;
         this.maxPlayers = maxPlayers >= 2 && maxPlayers <= 10 ? maxPlayers : 4;
@@ -126,12 +130,10 @@ class Game {
                 maxHealth: 0
             };
 
-            _utils.forEach(this.map.boards[nickname].ships, (ship: BSShip) => {
-                let shipHealth = ship.width * ship.height;
+            _utils.forEach(board.ships, (ship: Ship) => {
+                let shipHealth = ship.dimensions.x * ship.dimensions.y;
                 playerInfo.maxHealth += shipHealth;
-                if (ship.destroyed) {
-                    return;
-                }
+                if (ship.destroyed) return;
                 playerInfo.health += (shipHealth - ship.hits.length);
             });
             infos.push(playerInfo);
@@ -163,19 +165,15 @@ class Game {
         return this;
     };
 
-    public placePlayerShips = (socket: SocketIO.Socket, ships: Array<BSShip>) : boolean => {
+    public placePlayerShips = (socket: SocketIO.Socket, raw_ships: Array<BSShip>) : boolean => {
+        let ships = [];
+        _utils.forEach(raw_ships, (raw_ship: BSShip) => {
+            let ship = new Ship();
+            ship.setFromBSShip(raw_ship);
+            ships.push(ship);
+        });
         if (this.logic.isDispositionValid(this.map, ships)) {
-
-            if (_utils.isUndefined(this.map.boards[socket.nickname])) {
-                this.map.boards[socket.nickname] = {};
-            }
-            this.map.boards[socket.nickname].ships = {};
-
-            _utils.forEach(ships, (ship: BSShip, index: string) => {
-                ship.id = socket.nickname + "-ship-" + index;
-                ship.hits = [];
-                this.map.boards[socket.nickname].ships[ship.id] = ship;
-            });
+            this.map.setShipDisposition(socket.nickname, ships);
 
             let allReady = true;
             _utils.forEach(this.players, (player: BSPlayer, nickname: string) => {

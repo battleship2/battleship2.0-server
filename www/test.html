@@ -192,16 +192,15 @@
         message.textContent = 'Place your ships!';
         document.getElementById('messages').appendChild(message);
 
-        var disposition = [{
+        var dispositions = [{
             x: 0,
             y: 0,
-            width: 1,
-            height: 5,
-            type: 4 // BSData.ShipType.DESTROYER
+            type: 4, // BSData.ShipType.DESTROYER
+            horizontal: true
         }];
-        socket.emit('place ships', disposition);
+        socket.emit('place ships', dispositions);
 //        var text = document.createElement('textarea');
-//        text.textContent = JSON.stringify(disposition);
+//        text.textContent = JSON.stringify(dispositions);
 //        var button = document.createElement('button');
 //        button.textContent = 'send';
 //        document.getElementById('actions').innerHTML = '';
@@ -225,7 +224,7 @@
 
         var text = document.createElement('input');
         var action = [{
-            type: 'bomb',
+            type: 0, // BSData.ActionType.BOMB,
             x: 0,
             y: 0
         }];

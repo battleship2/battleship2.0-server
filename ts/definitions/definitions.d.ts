@@ -74,20 +74,20 @@ interface BSPlayerInfo {
     maxHealth: number;
 }
 
-interface BSCoordinates {
+interface BSVector2 {
     x: number;
     y: number;
 }
 
+interface BSCoordinates extends BSVector2 {}
+
+interface BSDimensions extends BSVector2 {}
+
 interface BSShip {
     x: number;
     y: number;
-    id: string;
-    hits: Array<BSCoordinates>;
     type: BSData.ShipType;
-    width: number;
-    height: number;
-    destroyed: boolean;
+    horizontal: boolean;
 }
 
 interface BSAction {
@@ -143,7 +143,7 @@ interface BSShipAmount {
 /**********************************************************************************/
 
 interface BSShipRegistry {
-    [shipId: string]: BSShip;
+    [shipId: string]: any;
 }
 
 interface BSActionRegistry {
