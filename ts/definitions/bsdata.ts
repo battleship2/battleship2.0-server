@@ -19,8 +19,8 @@ namespace BSData {
         export const BOMB: number = 0;
     }
 
-    export const events = {
-        on: {
+    export namespace events {
+        export const on = {
             READY: "ready",
             MESSAGE: "message",
             JOIN_GAME: "join game",
@@ -30,9 +30,9 @@ namespace BSData {
             LEAVE_GAME: "leave game",
             CREATE_GAME: "create game",
             PLACE_SHIPS: "place ships"
-        },
+        };
 
-        emit: {
+        export const emit = {
             MESSAGE: "message",
             REFUSED: "refused",
             NICKNAME: "nickname",
