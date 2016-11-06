@@ -3,9 +3,15 @@
 import Utils = require("../../services/utils.service");
 import BSData = require("../../definitions/bsdata");
 
+import ShipCarrier = require("./ship.carrier.class");
+import ShipBattleship = require("./ship.battleship.class");
+import ShipCruiser = require("./ship.cruiser.class");
+import ShipSubmarine = require("./ship.submarine.class");
+import ShipDestroyer = require("./ship.destroyer.class");
+
 let _utils: Utils = new Utils();
 
-class Ship {
+abstract class Ship {
 
     /**********************************************************************************/
     /*                                                                                */
@@ -15,12 +21,13 @@ class Ship {
 
     public hits: Array<BSCoordinates> = [];
     public coord: BSCoordinates;
+    public size: number;
     public bs_uuid: string = _utils.uuid();
     public destroyed: boolean = false;
     public horizontal: boolean = true;
     public dimensions: BSDimensions;
 
-    private _type: BSShipType = BSData.ShipType.ABSTRACT;
+    private _type: string = "UNDEFINED";
 
     /**********************************************************************************/
     /*                                                                                */
@@ -28,12 +35,13 @@ class Ship {
     /*                                                                                */
     /**********************************************************************************/
 
-    constructor(type: BSShipType = BSData.ShipType.ABSTRACT, x: number = 0, y: number = 0, horizontal: boolean = true) {
+    constructor(type: string, size: number, x: number = 0, y: number = 0, horizontal: boolean = true) {
         this.coord = {x : x, y : y};
         this._type = type;
+        this.size = size;
         this.dimensions = {
-            x : horizontal ? this._type.length : 1,
-            y : horizontal ? 1 : this._type.length
+            x : horizontal ? this.size : 1,
+            y : horizontal ? 1 : this.size
         };
     }
 
@@ -43,12 +51,33 @@ class Ship {
     /*                                                                                */
     /**********************************************************************************/
 
-    public type = (_type?: BSShipType): BSShipType =>  {
+    public type = (_type?: string): string =>  {
         if (_utils.isUndefined(_type)) {
             return this._type;
         }
         this._type = _type;
         return this._type;
+    };
+
+    static getShip = (bs_ship: BSShip): Ship => {
+        let x = bs_ship.x,
+            y = bs_ship.y,
+            horizontal = bs_ship.horizontal;
+
+        switch (bs_ship.type) {
+            case "CARRIER":
+                return new ShipCarrier(x, y, horizontal);
+            case "BATTLESHIP":
+                return new ShipBattleship(x, y, horizontal);
+            case "CRUISER":
+                return new ShipCruiser(x, y, horizontal);
+            case "SUBMARINE":
+                return new ShipSubmarine(x, y, horizontal);
+            case "DESTROYER":
+                return new ShipDestroyer(x, y, horizontal);
+            default:
+                throw new Error();
+        }
     };
 
     public setFromBSShip = (ship: Ship): Ship => {

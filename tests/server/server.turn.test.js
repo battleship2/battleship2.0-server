@@ -2,6 +2,7 @@ var expect = require('chai').expect,
     sinon = require('sinon'),
     BSData = require('../../src/release/definitions/bsdata'),
     Ship = require('../../src/release/classes/ships/abstract.ship.class'),
+    ShipBattleship = require('../../src/release/classes/ships/ship.battleship.class'),
     Game = require('../../src/release/classes/game.class');
 
 describe('server.turn:', function () {
@@ -121,7 +122,7 @@ describe('server.turn:', function () {
     it('should return all the players actions at the end of the turn', function () {
         game.map.max = {action: 1};
 
-        var ship3 = new Ship(2, 2, true, BSData.ShipType.BATTLESHIP);
+        var ship3 = new ShipBattleship(2, 2, true);
         game.map.boards[player3.bs_uuid].ships = {};
         game.map.boards[player3.bs_uuid].ships[ship3.bs_uuid] = ship3;
 
@@ -152,7 +153,7 @@ describe('server.turn:', function () {
         result = game.playTheTurn();
 
         expect(result).to.have.property('actions').to.have.length(2);
-        console.log(result.actions);
+
         expect(result.actions[0].result).to.deep.equal([{
             localHit: {x: 0, y: 0},
             owner: player3.bs_uuid,
@@ -304,9 +305,9 @@ describe('server.turn:', function () {
 
     it('should indicate if the bomb of a player sank an ship', function () {
         game.map.max = {action: 1};
-        var ship1 = new Ship(0, 0, true, BSData.ShipType.BATTLESHIP);
-        var ship2 = new Ship(1, 1, true, BSData.ShipType.BATTLESHIP);
-        var ship3 = new Ship(2, 2, true, BSData.ShipType.BATTLESHIP);
+        var ship1 = new ShipBattleship(0, 0, true);
+        var ship2 = new ShipBattleship(1, 1, true);
+        var ship3 = new ShipBattleship(2, 2, true);
         game.map.boards[player1.bs_uuid].ships = {};
         game.map.boards[player2.bs_uuid].ships = {};
         game.map.boards[player3.bs_uuid].ships = {};

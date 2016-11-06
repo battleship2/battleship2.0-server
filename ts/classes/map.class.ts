@@ -93,7 +93,7 @@ class Map {
             });
 
             _utils.forEach(ships, (ship: Ship) => {
-                let type = ship.type().name;
+                let type = ship.type();
                 if (_utils.isUndefined(check[type])) {
                     throw new Error();
                 }

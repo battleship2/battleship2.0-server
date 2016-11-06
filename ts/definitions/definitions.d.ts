@@ -94,7 +94,7 @@ interface BSDimensions extends BSVector2 {}
 interface BSShip {
     x: number;
     y: number;
-    type: BSShipType;
+    type: string;
     horizontal: boolean;
 }
 

@@ -134,7 +134,7 @@ function _playTurn(socket: SocketIO.Socket, bomb: Array<BSAction>): Socket {
     return _instance;
 }
 
-function _placeShips(socket: SocketIO.Socket, ships: Array<Ship>): Socket {
+function _placeShips(socket: SocketIO.Socket, ships: Array<BSShip>): Socket {
     if (_isPlaying(socket)) {
         let game = _getGame(socket);
         if (game.state() === BSData.State.SETTING) {
