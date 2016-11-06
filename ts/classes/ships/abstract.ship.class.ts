@@ -43,24 +43,19 @@ class Ship {
     /*                                                                                */
     /**********************************************************************************/
 
+    static copy = (ship: Ship): Ship => {
+        let _ship = new Ship(ship.type(), ship.coord.x, ship.coord.y, ship.horizontal);
+        _ship.hits = [];
+        _ship.destroyed = false;
+        return _ship;
+    };
+
     public type = (_type?: BSShipType): BSShipType =>  {
         if (_utils.isUndefined(_type)) {
             return this._type;
         }
         this._type = _type;
         return this._type;
-    };
-
-    public setFromBSShip = (ship: Ship): Ship => {
-        this._type = ship.type();
-        this.coord = {x : ship.dimensions.x, y : ship.dimensions.y};
-        this.dimensions = {
-            x : ship.horizontal ? this._type.length : 1,
-            y : ship.horizontal ? 1 : this._type.length
-        };
-        this.hits = [];
-        this.destroyed = false;
-        return this;
     };
 
     public isAffectedByAction = (action: BSAction): boolean | BSCoordinates => {

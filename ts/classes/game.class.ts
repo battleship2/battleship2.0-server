@@ -169,9 +169,7 @@ class Game {
     public placePlayerShips = (socket: SocketIO.Socket, raw_ships: Array<Ship>) : boolean => {
         let ships = [];
         _utils.forEach(raw_ships, (raw_ship: Ship) => {
-            let ship = new Ship();
-            ship.setFromBSShip(raw_ship);
-            ships.push(ship);
+            ships.push(Ship.copy(raw_ship));
         });
         if (this.logic.isDispositionValid(this.map, ships)) {
             this.map.setShipDisposition(socket.bs_uuid, ships);

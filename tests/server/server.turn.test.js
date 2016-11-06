@@ -22,14 +22,7 @@ describe('server.turn:', function () {
     };
 
     var makeDestroyer = function (x, y) {
-        return {
-            dimensions: {
-                x: x,
-                y: y
-            },
-            type: function () { return BSData.ShipType.DESTROYER; },
-            horizontal: true
-        };
+        return new Ship(BSData.ShipType.DESTROYER, x, y, true);
     };
 
     var makeBomb = function (x, y) {

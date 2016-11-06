@@ -11,25 +11,16 @@ describe('game.logic:', function () {
         actions = [],
         map;
 
-    var makeShip = function (x, y, type, horizontal) {
-        var ship = new Ship();
-        ship.setFromBSShip({
-            dimensions: {
-                x: x,
-                y: y
-            },
-            type: function () { return type; },
-            horizontal: horizontal
-        });
-        return ship;
-    };
-
     var makeBomb = function (x, y) {
         return {
             type: BSData.ActionType.BOMB,
             x: x,
             y: y
         };
+    };
+
+    var makeShip = function (x, y, type, horizontal) {
+        return new Ship(type, x, y, horizontal);
     };
 
     describe('[Ships settings]', function () {
