@@ -1,6 +1,7 @@
 var expect = require('chai').expect,
     sinon = require('sinon'),
     BSData = require('../../src/release/definitions/bsdata'),
+    Ship = require('../../src/release/classes/entities/entity.ship.class'),
     Game = require('../../src/release/classes/game.class');
 
 describe('turn process for basic game', function () {
@@ -24,9 +25,8 @@ describe('turn process for basic game', function () {
         return {
             x: x,
             y: y,
-            width: 2,
-            height: 1,
-            type: BSData.ShipType.DESTROYER
+            type: BSData.ShipType.DESTROYER,
+            horizontal: true
         };
     };
 
@@ -40,9 +40,7 @@ describe('turn process for basic game', function () {
 
     beforeEach(function () {
         game = new Game('test', 3);
-        game.map.width = 10;
-        game.map.height = 10;
-        game.map.ships = [{type: BSData.ShipType.DESTROYER, amount: 1}];
+        game.map.setShips([{type: BSData.ShipType.DESTROYER, amount: 1}]);
         player1 = createMockPlayer('player1');
         game.addPlayer(player1);
         player2 = createMockPlayer('player2');

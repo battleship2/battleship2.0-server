@@ -1,30 +1,25 @@
 var expect = require('chai').expect,
     GameLogic = require('../../../src/release/logics/game.logic'),
-    BSData = require('../../../src/release/definitions/bsdata');
+    BSData = require('../../../src/release/definitions/bsdata'),
+    Ship = require('../../../src/release/classes/entities/entity.ship.class'),
+    Map = require('../../../src/release/classes/map.class');
 
 describe('basic game mechanics', function () {
 
     var mechanics = new GameLogic();
     var ships = [],
         actions = [],
-        map = {};
-
-    var Ships = {};
-    Ships[BSData.ShipType.CARRIER] = 5;
-    Ships[BSData.ShipType.BATTLESHIP] = 4;
-    Ships[BSData.ShipType.CRUISER] = 3;
-    Ships[BSData.ShipType.SUBMARINE] = 3;
-    Ships[BSData.ShipType.DESTROYER] = 2;
+        map;
 
     var makeShip = function (x, y, type, horizontal) {
-        return {
+        var ship = new Ship();
+        ship.setFromBSShip({
             x: x,
             y: y,
-            width: horizontal ? Ships[type] : 1,
-            height: horizontal ? 1 : Ships[type],
             type: type,
-            hits: []
-        };
+            horizontal: horizontal
+        });
+        return ship;
     };
 
     var makeBomb = function (x, y) {
@@ -39,33 +34,28 @@ describe('basic game mechanics', function () {
 
         var isValid = mechanics.isDispositionValid;
 
-        beforeEach(function (done) {
+        beforeEach(function () {
             ships = [];
-            map = {
-                width: 10,
-                height: 10,
-                ships: [
-                    {type: BSData.ShipType.CARRIER, amount: 1},
-                    {type: BSData.ShipType.BATTLESHIP, amount: 1},
-                    {type: BSData.ShipType.CRUISER, amount: 1},
-                    {type: BSData.ShipType.SUBMARINE, amount: 1},
-                    {type: BSData.ShipType.DESTROYER, amount: 1}
-                ]
-            };
-            done();
+            map = new Map({x: 10, y: 10});
+            map.setShips([
+                {type: BSData.ShipType.CARRIER, amount: 1},
+                {type: BSData.ShipType.BATTLESHIP, amount: 1},
+                {type: BSData.ShipType.CRUISER, amount: 1},
+                {type: BSData.ShipType.SUBMARINE, amount: 1},
+                {type: BSData.ShipType.DESTROYER, amount: 1}]);
         });
 
         it('should not be valid if the map has any dimension smaller than 5', function () {
             ships = [makeShip(0, 0, BSData.ShipType.CARRIER, true)];
-            map.ships = [{type: BSData.ShipType.CARRIER, amount: 1}];
-            map.width = 4;
-            map.height = 5;
+            map.setShips([{type: BSData.ShipType.CARRIER, amount: 1}]);
+            map.dimensions.x = 4;
+            map.dimensions.y = 5;
             expect(isValid(map, ships)).to.be.false;
-            map.width = 5;
-            map.height = 4;
+            map.dimensions.x = 5;
+            map.dimensions.y = 4;
             expect(isValid(map, ships)).to.be.false;
-            map.width = 5;
-            map.height = 5;
+            map.dimensions.x = 5;
+            map.dimensions.y = 5;
             expect(isValid(map, ships)).to.be.true;
         });
 
@@ -94,7 +84,6 @@ describe('basic game mechanics', function () {
 
         it('should not be valid if ships are out of boundaries', function () {
             map.ships = [{type: BSData.ShipType.CARRIER, amount: 1}];
-
             ships = [makeShip(-1, 0, BSData.ShipType.CARRIER, true)];
             expect(isValid(map, ships)).to.be.false;
             ships = [makeShip(0, -1, BSData.ShipType.CARRIER, true)];
@@ -121,17 +110,16 @@ describe('basic game mechanics', function () {
 
         it('should not be valid if two or more ships are overlapping', function () {
             map.ships = [{type: BSData.ShipType.CARRIER, amount: 2}];
-
             ships = [makeShip(0, 0, BSData.ShipType.CARRIER, true), makeShip(0, 0, BSData.ShipType.CARRIER, true)];
             expect(isValid(map, ships)).to.be.false;
-            ships[1].x = 5;
+            ships[1].coord.x = 5;
             expect(isValid(map, ships)).to.be.true;
 
             ships[0] = makeShip(0, 3, BSData.ShipType.CARRIER, true);
             ships[1] = makeShip(3, 0, BSData.ShipType.CARRIER, false);
             expect(isValid(map, ships)).to.be.false;
 
-            ships[1].x = 5;
+            ships[1].coord.x = 5;
             expect(isValid(map, ships)).to.be.true;
 
             map.ships = [
@@ -157,17 +145,10 @@ describe('basic game mechanics', function () {
 
         var isValid = mechanics.isActionsValid;
 
-        beforeEach(function (done) {
-            map = {
-                width: 10,
-                height: 10,
-                max: {
-                    action: 3,
-                    other: [{type: BSData.ActionType.BOMB, amount: 3}]
-                }
-            };
+        beforeEach(function () {
+            map = new Map({x: 10, y: 10});
+            map.setActionsLimit(3, [{type: BSData.ActionType.BOMB, amount: 3}]);
             actions = [];
-            done();
         });
 
         it('should be valid if the number of actions does not exceed what is authorized', function () {
@@ -204,8 +185,8 @@ describe('basic game mechanics', function () {
             actions = [makeBomb(5, 5)];
             expect(isValid(map, actions)).to.be.true;
 
-            map.width = 5;
-            map.height = 5;
+            map.dimensions.x = 5;
+            map.dimensions.y = 5;
 
             expect(isValid(map, actions)).to.be.false;
             actions = [makeBomb(4, 4)];
@@ -265,14 +246,14 @@ describe('basic game mechanics', function () {
         it("should return information for every hits", function () {
             var ship1 = makeShip(3, 2, BSData.ShipType.DESTROYER, false);
             var ship2 = makeShip(0, 0, BSData.ShipType.CARRIER, true);
-            ship1.id = 'player1-ship-0';
-            ship2.id = 'player2-ship-0';
+            ship1.bs_uuid = 'player1-ship-0';
+            ship2.bs_uuid = 'player2-ship-0';
             map.boards.player1.ships = {'player1-ship-0': ship1};
             map.boards.player2.ships = {'player2-ship-0': ship2};
             actions.player1 = [makeBomb(0, 0), makeBomb(5, 5)];
             actions.player2 = [];
 
-            var result = processTurn(actions, map);
+            var result = processTurn(map, actions);
             expect(result).to.have.length(2);
 
             var action1 = result[0];
@@ -295,7 +276,7 @@ describe('basic game mechanics', function () {
             expect(action2.result).to.deep.equal([]);
 
             actions.player2 = [makeBomb(3, 3)];
-            result = processTurn(actions, map);
+            result = processTurn(map, actions);
 
             expect(result).to.have.length(3);
 

@@ -103,7 +103,7 @@ class Game {
     };
 
     public playTheTurn = () : {} => {
-        let actions = this.logic.processTurn(this.actions, this.map);
+        let actions = this.logic.processTurn(this.map, this.actions);
         let scores = _getTurnScores.call(this, actions);
 
         _updateBoards.call(this, actions);

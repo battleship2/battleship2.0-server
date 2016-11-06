@@ -117,8 +117,8 @@ class Map {
 }
 
 function _shipIsWithinBoundaries(map: Map, ship: Ship): boolean {
-    return (ship.dimensions.x >= 0 && (ship.coord.x + ship.dimensions.x - 1) < map.dimensions.x) &&
-        (ship.dimensions.x >= 0 && (ship.coord.y + ship.dimensions.y - 1) < map.dimensions.y);
+    return (ship.coord.x >= 0 && (ship.coord.x + ship.dimensions.x - 1) < map.dimensions.x) &&
+        (ship.coord.y >= 0 && (ship.coord.y + ship.dimensions.y - 1) < map.dimensions.y);
 }
 
 export = Map;

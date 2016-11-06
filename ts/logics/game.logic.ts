@@ -49,7 +49,7 @@ class GameLogic {
             && _actionsDoNotOverlap(map, actions);
     };
 
-    public processTurn = (playersActions: BSActionRegistry, map: Map): Array<BSAction> => {
+    public processTurn = (map: Map, playersActions: BSActionRegistry): Array<BSAction> => {
         let actionsResults: Array<BSAction> = [];
         _utils.forEach(playersActions, (actions: Array<BSAction>, nickname: string) => {
             _utils.forEach(actions, (action: BSAction) => {
