@@ -48,7 +48,7 @@ namespace BSData {
             GAME_CREATED: "game created",
             PLAYER_READY: "player ready",
             SHIP_PLACEMENT: "ship placement"
-        }
+        };
     };
 }
 
