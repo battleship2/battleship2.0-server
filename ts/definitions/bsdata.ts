@@ -24,8 +24,8 @@ namespace BSData {
             READY: "ready",
             MESSAGE: "message",
             JOIN_GAME: "join game",
-            LIST_GAME: "list games",
             PLAY_TURN: "play turn",
+            LIST_GAMES: "list games",
             DISCONNECT: "disconnect",
             LEAVE_GAME: "leave game",
             CREATE_GAME: "create game",
@@ -49,7 +49,7 @@ namespace BSData {
             PLAYER_READY: "player ready",
             SHIP_PLACEMENT: "ship placement"
         };
-    };
+    }
 }
 
 export = BSData;

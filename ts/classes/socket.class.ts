@@ -1,11 +1,12 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
 import * as http from "http";
+
 import Game = require("./game.class");
 import Ship = require("./ships/abstract.ship.class");
 import Utils = require("../services/utils.service");
-import Logger = require("../services/logger.service");
 import BSData = require("../definitions/bsdata");
+import Logger = require("../services/logger.service");
 import Nickname = require("../services/nickname.service");
 
 let __io: SocketIOStatic = require("socket.io");
@@ -15,6 +16,15 @@ let _logger: Logger = null;
 let _buffer: BSBuffer = { sockets: {}, games: {} };
 let _instance: Socket = null;
 let _nickname: Nickname = new Nickname();
+
+const _entityMap: { [symbol: string]: string } = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;",
+    "/": "&#x2F;"
+};
 
 class Socket {
 
@@ -57,7 +67,7 @@ class Socket {
             _buffer.sockets[socket.bs_uuid] = socket;
 
             socket.join("lobby");
-            socket.emit(BSData.events.emit.NICKNAME, socket.nickname);
+            socket.emit(BSData.events.emit.NICKNAME, { id: socket.bs_uuid, nickname: socket.nickname });
 
             // Player related events
             socket.on(BSData.events.on.DISCONNECT, _disconnect.bind(_instance, socket));
@@ -65,7 +75,7 @@ class Socket {
             // Room related events
             socket.on(BSData.events.on.JOIN_GAME, _joinGame.bind(_instance, socket));
             socket.on(BSData.events.on.LEAVE_GAME, _leaveGame.bind(_instance, socket));
-            socket.on(BSData.events.on.LIST_GAME, _listGames.bind(_instance, socket));
+            socket.on(BSData.events.on.LIST_GAMES, _listGames.bind(_instance, socket));
             socket.on(BSData.events.on.CREATE_GAME, _createGame.bind(_instance, socket));
 
             // Game related events
@@ -101,10 +111,22 @@ class Socket {
 /*                                                                                */
 /**********************************************************************************/
 
+function _makeSafeStringOf(value: string): string {
+    return String(value).replace(/[&<>"'\/]/g, (s: string) => {
+        return _entityMap[s];
+    });
+}
+
 function _message(socket: SocketIO.Socket, message: string): Socket {
+
+    if (!_utils.isString(message) || !message.trim().length) {
+        return _instance;
+    }
+
     let messageData = {
-        id: socket.id,
-        message: message,
+        id: socket.bs_uuid,
+        date: new Date(),
+        message: _makeSafeStringOf(message.trim()),
         nickname: socket.nickname
     };
 
