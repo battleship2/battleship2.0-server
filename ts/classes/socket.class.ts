@@ -138,7 +138,7 @@ function _placeShips(socket: SocketIO.Socket, ships: Array<BSShip>): Socket {
     if (_isPlaying(socket)) {
         let game = _getGame(socket);
         if (game.state() === BSData.State.SETTING) {
-            if (game.placePlayerShips(socket, ships)) {
+            if (game.placePlayerShips(socket, Ship.getShips(ships))) {
                 socket.emit(BSData.events.emit.SHIP_PLACEMENT, true);
                 if (game.state() === BSData.State.PLAYING) {
                     game.emit(_io, BSData.events.emit.GAME_STATE, {state: "new turn"});

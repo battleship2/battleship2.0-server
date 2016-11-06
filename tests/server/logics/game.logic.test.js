@@ -1,7 +1,11 @@
 var expect = require('chai').expect,
     GameLogic = require('../../../src/release/logics/game.logic'),
     BSData = require('../../../src/release/definitions/bsdata'),
-    Ship = require('../../../src/release/classes/ships/abstract.ship.class'),
+    ShipCarrier = require('../../../src/release/classes/ships/ship.carrier.class'),
+    ShipBattleship = require('../../../src/release/classes/ships/ship.battleship.class'),
+    ShipSubmarine = require('../../../src/release/classes/ships/ship.submarine.class'),
+    ShipCruiser = require('../../../src/release/classes/ships/ship.cruiser.class'),
+    ShipDestroyer = require('../../../src/release/classes/ships/ship.destroyer.class'),
     Map = require('../../../src/release/classes/map.class');
 
 describe('game.logic:', function () {
@@ -10,19 +14,6 @@ describe('game.logic:', function () {
     var ships = [],
         actions = [],
         map;
-
-    var makeShip = function (x, y, type, horizontal) {
-        var ship = new Ship();
-        ship.setFromBSShip({
-            dimensions: {
-                x: x,
-                y: y
-            },
-            type: function () { return type; },
-            horizontal: horizontal
-        });
-        return ship;
-    };
 
     var makeBomb = function (x, y) {
         return {
@@ -48,51 +39,52 @@ describe('game.logic:', function () {
         });
 
         it('should not be valid if the map has any dimension smaller than 5', function () {
-            ships = [makeShip(0, 0, BSData.ShipType.CARRIER, true)];
+            ships = [new ShipCarrier(0, 0)];
             map.setShips([{type: BSData.ShipType.CARRIER, amount: 1}]);
-            map.dimensions.x = 4;
-            map.dimensions.y = 5;
+
+            map.dimensions = {x: 4, y: 5};
             expect(isValid(map, ships)).to.be.false;
-            map.dimensions.x = 5;
-            map.dimensions.y = 4;
+
+            map.dimensions = {x: 5, y: 4};
             expect(isValid(map, ships)).to.be.false;
-            map.dimensions.x = 5;
-            map.dimensions.y = 5;
+
+            map.dimensions = {x: 5, y: 5};
             expect(isValid(map, ships)).to.be.true;
         });
 
         it('should not be valid if not all ships have been set', function () {
-            ships.push(makeShip(0, 1, BSData.ShipType.CARRIER, true));
-            ships.push(makeShip(0, 2, BSData.ShipType.BATTLESHIP, true));
-            ships.push(makeShip(0, 3, BSData.ShipType.CRUISER, true));
-            ships.push(makeShip(0, 4, BSData.ShipType.SUBMARINE, true));
+            ships = [
+                new ShipCarrier(0, 1),
+                new ShipBattleship(0, 2),
+                new ShipCruiser(0, 3),
+                new ShipSubmarine(0, 4)];
             expect(isValid(map, ships)).to.be.false;
-            ships.push(makeShip(0, 5, BSData.ShipType.DESTROYER, true));
+            ships.push(new ShipDestroyer(0, 5));
             expect(isValid(map, ships)).to.be.true;
-            ships.push(makeShip(0, 6, BSData.ShipType.DESTROYER, true));
+            ships.push(new ShipDestroyer(0, 6));
             expect(isValid(map, ships)).to.be.false;
         });
 
         it('should not be valid if not all specified ships are present', function () {
             map.ships = [{type: BSData.ShipType.DESTROYER, amount: 2}];
 
-            ships = [makeShip(0, 0, BSData.ShipType.SUBMARINE, true), makeShip(0, 1, BSData.ShipType.SUBMARINE, true)];
+            ships = [new ShipSubmarine(0, 0), new ShipSubmarine(0, 1)];
             expect(isValid(map, ships)).to.be.false;
-            ships = [makeShip(0, 0, BSData.ShipType.DESTROYER, true), makeShip(0, 1, BSData.ShipType.SUBMARINE, true)];
+            ships = [new ShipDestroyer(0, 0), new ShipSubmarine(0, 1)];
             expect(isValid(map, ships)).to.be.false;
-            ships = [makeShip(0, 0, BSData.ShipType.DESTROYER, true), makeShip(0, 1, BSData.ShipType.DESTROYER, true)];
+            ships = [new ShipDestroyer(0, 0), new ShipDestroyer(0, 1)];
             expect(isValid(map, ships)).to.be.true;
         });
 
         it('should not be valid if ships are out of boundaries', function () {
             map.ships = [{type: BSData.ShipType.CARRIER, amount: 1}];
-            ships = [makeShip(-1, 0, BSData.ShipType.CARRIER, true)];
+            ships = [new ShipCarrier(-1, 0, true)];
             expect(isValid(map, ships)).to.be.false;
-            ships = [makeShip(0, -1, BSData.ShipType.CARRIER, true)];
+            ships = [new ShipCarrier(0, -1, true)];
             expect(isValid(map, ships)).to.be.false;
-            ships = [makeShip(9, 0, BSData.ShipType.CARRIER, true)];
+            ships = [new ShipCarrier(9, 0, true)];
             expect(isValid(map, ships)).to.be.false;
-            ships = [makeShip(0, 9, BSData.ShipType.CARRIER, false)];
+            ships = [new ShipCarrier(0, 9, false)];
             expect(isValid(map, ships)).to.be.false;
         });
 
@@ -102,9 +94,9 @@ describe('game.logic:', function () {
                 {type: BSData.ShipType.CRUISER, amount: 2}
             ];
 
-            var carrier = makeShip(9 - 5, 0, BSData.ShipType.CARRIER, true),
-                cruiser1 = makeShip(2, 1, BSData.ShipType.CRUISER, true),
-                cruiser2 = makeShip(9 - 3, 1, BSData.ShipType.CRUISER, true);
+            var carrier = new ShipCarrier(9 - 5, 0),
+                cruiser1 = new ShipCruiser(2, 1),
+                cruiser2 = new ShipCruiser(9 - 3, 1);
 
             ships = [cruiser1, carrier, cruiser2];
             expect(isValid(map, ships)).to.be.true;
@@ -112,13 +104,13 @@ describe('game.logic:', function () {
 
         it('should not be valid if two or more ships are overlapping', function () {
             map.ships = [{type: BSData.ShipType.CARRIER, amount: 2}];
-            ships = [makeShip(0, 0, BSData.ShipType.CARRIER, true), makeShip(0, 0, BSData.ShipType.CARRIER, true)];
+            ships = [new ShipCarrier(0, 0), new ShipCarrier(0, 0)];
             expect(isValid(map, ships)).to.be.false;
             ships[1].coord.x = 5;
             expect(isValid(map, ships)).to.be.true;
 
-            ships[0] = makeShip(0, 3, BSData.ShipType.CARRIER, true);
-            ships[1] = makeShip(3, 0, BSData.ShipType.CARRIER, false);
+            ships[0] = new ShipCarrier(0, 3, true);
+            ships[1] = new ShipCarrier(3, 0, false);
             expect(isValid(map, ships)).to.be.false;
 
             ships[1].coord.x = 5;
@@ -129,16 +121,16 @@ describe('game.logic:', function () {
                 {type: BSData.ShipType.DESTROYER, amount: 1}
             ];
 
-            ships = [makeShip(1, 1, BSData.ShipType.BATTLESHIP, true), makeShip(2, 1, BSData.ShipType.DESTROYER, true)];
+            ships = [new ShipBattleship(1, 1), new ShipDestroyer(2, 1)];
             expect(isValid(map, ships)).to.be.false;
 
-            ships[1] = makeShip(2, 1, BSData.ShipType.DESTROYER, true);
+            ships[1] = new ShipDestroyer(2, 1);
             expect(isValid(map, ships)).to.be.false;
 
-            ships[1] = makeShip(4, 1, BSData.ShipType.DESTROYER, true);
+            ships[1] = new ShipDestroyer(4, 1);
             expect(isValid(map, ships)).to.be.false;
 
-            ships[1] = makeShip(5, 1, BSData.ShipType.DESTROYER, true);
+            ships[1] = new ShipDestroyer(5, 1);
             expect(isValid(map, ships)).to.be.true;
         });
     });
@@ -222,13 +214,13 @@ describe('game.logic:', function () {
             map,
             actions;
 
-        beforeEach(function (done) {
+        beforeEach(function () {
             map = {
                 width: 10,
                 height: 10,
                 boards: {
                     player1: {
-                        ships: [makeShip(0, 0, BSData.ShipType.CARRIER, true)]
+                        ships: [new ShipCarrier(0, 0)]
                     },
                     player2: {
                         ships: []
@@ -242,12 +234,11 @@ describe('game.logic:', function () {
                 player1: [],
                 player2: []
             };
-            done();
         });
 
         it("should return information for every hits", function () {
-            var ship1 = makeShip(3, 2, BSData.ShipType.DESTROYER, false);
-            var ship2 = makeShip(0, 0, BSData.ShipType.CARRIER, true);
+            var ship1 = new ShipDestroyer(3, 2, false);
+            var ship2 = new ShipCarrier(0, 0, true);
             ship1.bs_uuid = 'player1-ship-0';
             ship2.bs_uuid = 'player2-ship-0';
             map.boards.player1.ships = {'player1-ship-0': ship1};

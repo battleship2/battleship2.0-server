@@ -166,13 +166,7 @@ class Game {
         return this;
     };
 
-    public placePlayerShips = (socket: SocketIO.Socket, raw_ships: Array<BSShip>) : boolean => {
-        let ships = [];
-        _utils.forEach(raw_ships, (raw_ship: BSShip) => {
-            let s = Ship.getShip(raw_ship);
-            console.log(s);
-            ships.push(s);
-        });
+    public placePlayerShips = (socket: SocketIO.Socket, ships: Array<Ship>) : boolean => {
         if (this.logic.isDispositionValid(this.map, ships)) {
             this.map.setShipDisposition(socket.bs_uuid, ships);
 

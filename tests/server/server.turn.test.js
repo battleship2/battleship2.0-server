@@ -1,8 +1,8 @@
 var expect = require('chai').expect,
     sinon = require('sinon'),
     BSData = require('../../src/release/definitions/bsdata'),
-    Ship = require('../../src/release/classes/ships/abstract.ship.class'),
     ShipBattleship = require('../../src/release/classes/ships/ship.battleship.class'),
+    ShipDestroyer = require('../../src/release/classes/ships/ship.destroyer.class'),
     Game = require('../../src/release/classes/game.class');
 
 describe('server.turn:', function () {
@@ -19,17 +19,6 @@ describe('server.turn:', function () {
             game: null,
             join: function () {},
             leave: function () {}
-        };
-    };
-
-    var makeDestroyer = function (x, y) {
-        return {
-            dimensions: {
-                x: x,
-                y: y
-            },
-            type: function () { return BSData.ShipType.DESTROYER; },
-            horizontal: true
         };
     };
 
@@ -53,9 +42,10 @@ describe('server.turn:', function () {
         game.setPlayerReady(player1, true);
         game.setPlayerReady(player2, true);
         game.setPlayerReady(player3, true);
-        game.placePlayerShips(player1, [makeDestroyer(0, 0)]);
-        game.placePlayerShips(player2, [makeDestroyer(1, 1)]);
-        game.placePlayerShips(player3, [makeDestroyer(2, 2)]);
+        var a = game.placePlayerShips(player1, [new ShipDestroyer(0, 0)]);
+        console.log(a);
+        game.placePlayerShips(player2, [new ShipDestroyer(1, 1)]);
+        game.placePlayerShips(player3, [new ShipDestroyer(2, 2)]);
     });
 
     it('should save all the players actions during the turn', function () {

@@ -11,7 +11,7 @@ import ShipDestroyer = require("./ship.destroyer.class");
 
 let _utils: Utils = new Utils();
 
-abstract class Ship {
+class Ship {
 
     /**********************************************************************************/
     /*                                                                                */
@@ -57,6 +57,14 @@ abstract class Ship {
         }
         this._type = _type;
         return this._type;
+    };
+
+    static getShips = (bs_ships: Array<BSShip>): Array<Ship> => {
+        let ships = [];
+        _utils.forEach(bs_ships, (bs_ship: BSShip) => {
+            ships.push(Ship.getShip(bs_ship));
+        });
+        return ships;
     };
 
     static getShip = (bs_ship: BSShip): Ship => {
