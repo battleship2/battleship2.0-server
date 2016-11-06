@@ -3,12 +3,6 @@
 import Utils = require("../../services/utils.service");
 import BSData = require("../../definitions/bsdata");
 
-import ShipCarrier = require("./ship.carrier.class");
-import ShipBattleship = require("./ship.battleship.class");
-import ShipCruiser = require("./ship.cruiser.class");
-import ShipSubmarine = require("./ship.submarine.class");
-import ShipDestroyer = require("./ship.destroyer.class");
-
 let _utils: Utils = new Utils();
 
 class Ship {
@@ -57,35 +51,6 @@ class Ship {
         }
         this._type = _type;
         return this._type;
-    };
-
-    static getShips = (bs_ships: Array<BSShip>): Array<Ship> => {
-        let ships = [];
-        _utils.forEach(bs_ships, (bs_ship: BSShip) => {
-            ships.push(Ship.getShip(bs_ship));
-        });
-        return ships;
-    };
-
-    static getShip = (bs_ship: BSShip): Ship => {
-        let x = bs_ship.x,
-            y = bs_ship.y,
-            horizontal = bs_ship.horizontal;
-
-        switch (bs_ship.type) {
-            case "CARRIER":
-                return new ShipCarrier(x, y, horizontal);
-            case "BATTLESHIP":
-                return new ShipBattleship(x, y, horizontal);
-            case "CRUISER":
-                return new ShipCruiser(x, y, horizontal);
-            case "SUBMARINE":
-                return new ShipSubmarine(x, y, horizontal);
-            case "DESTROYER":
-                return new ShipDestroyer(x, y, horizontal);
-            default:
-                throw new Error();
-        }
     };
 
     public setFromBSShip = (ship: Ship): Ship => {

@@ -13,7 +13,19 @@ describe('game.logic:', function () {
     var mechanics = new GameLogic();
     var ships = [],
         actions = [],
-        map;
+        map,
+        player1,
+        player2;
+
+    var createMockPlayer = function (id) {
+        return {
+            bs_uuid: id,
+            nickname: id,
+            game: null,
+            join: function () {},
+            leave: function () {}
+        };
+    };
 
     var makeBomb = function (x, y) {
         return {
@@ -55,8 +67,8 @@ describe('game.logic:', function () {
         it('should not be valid if not all ships have been set', function () {
             ships = [
                 new ShipCarrier(0, 1),
-                new ShipBattleship(0, 2),
                 new ShipCruiser(0, 3),
+                new ShipBattleship(0, 2),
                 new ShipSubmarine(0, 4)];
             expect(isValid(map, ships)).to.be.false;
             ships.push(new ShipDestroyer(0, 5));
@@ -210,41 +222,25 @@ describe('game.logic:', function () {
 
     describe('[Process turn (bomb)]', function () {
 
-        var processTurn = mechanics.processTurn,
-            map,
-            actions;
+        var processTurn = mechanics.processTurn;
 
         beforeEach(function () {
-            map = {
-                width: 10,
-                height: 10,
-                boards: {
-                    player1: {
-                        ships: [new ShipCarrier(0, 0)]
-                    },
-                    player2: {
-                        ships: []
-                    },
-                    player3: {
-                        ships: []
-                    }
-                }
-            };
-            actions = {
-                player1: [],
-                player2: []
-            };
+            map = new Map({x: 10, y: 10});
+            map.setActionsLimit(3, [{type: BSData.ActionType.BOMB, amount: 3}]);
+            player1 = createMockPlayer("player1");
+            player2 = createMockPlayer("player2");
+            map.boards[player1.bs_uuid] = {ships: {}};
+            map.boards[player2.bs_uuid] = {ships: {}};
+            actions = {};
         });
 
-        it("should return information for every hits", function () {
+        it('should return information for every hits', function () {
             var ship1 = new ShipDestroyer(3, 2, false);
             var ship2 = new ShipCarrier(0, 0, true);
-            ship1.bs_uuid = 'player1-ship-0';
-            ship2.bs_uuid = 'player2-ship-0';
-            map.boards.player1.ships = {'player1-ship-0': ship1};
-            map.boards.player2.ships = {'player2-ship-0': ship2};
-            actions.player1 = [makeBomb(0, 0), makeBomb(5, 5)];
-            actions.player2 = [];
+            map.boards[player1.bs_uuid].ships[ship1.bs_uuid] = ship1;
+            map.boards[player2.bs_uuid].ships[ship2.bs_uuid] = ship2;
+            actions[player1.bs_uuid] = [makeBomb(0, 0), makeBomb(5, 5)];
+            actions[player2.bs_uuid] = [];
 
             var result = processTurn(map, actions);
             expect(result).to.have.length(2);
@@ -252,19 +248,19 @@ describe('game.logic:', function () {
             var action1 = result[0];
             expect(action1.x).to.be.equal(0);
             expect(action1.y).to.be.equal(0);
-            expect(action1.owner).to.be.equal('player1');
+            expect(action1.owner).to.be.equal(player1.bs_uuid);
             expect(action1.type).to.be.equal(BSData.ActionType.BOMB);
             expect(action1.result).to.deep.equal([{
                 type: 'hit ship',
                 localHit: {x: 0, y: 0},
-                target: 'player2-ship-0',
-                owner: 'player2'
+                target: ship2.bs_uuid,
+                owner: player2.bs_uuid
             }]);
 
             var action2 = result[1];
             expect(action2.x).to.be.equal(5);
             expect(action2.y).to.be.equal(5);
-            expect(action2.owner).to.be.equal('player1');
+            expect(action2.owner).to.be.equal(player1.bs_uuid);
             expect(action2.type).to.be.equal(BSData.ActionType.BOMB);
             expect(action2.result).to.deep.equal([]);
 
@@ -276,12 +272,12 @@ describe('game.logic:', function () {
             var action3 = result[2];
             expect(action3.x).to.be.equal(3);
             expect(action3.y).to.be.equal(3);
-            expect(action3.owner).to.be.equal('player2');
+            expect(action3.owner).to.be.equal(player2.bs_uuid);
             expect(action3.type).to.be.equal(BSData.ActionType.BOMB);
             expect(action3.result).to.deep.equal([{
                 type: 'hit ship',
-                target: 'player1-ship-0',
-                owner: 'player1',
+                target: ship1.bs_uuid,
+                owner: player1.bs_uuid,
                 localHit: {x: 0, y: 1}
             }]);
         });

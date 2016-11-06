@@ -4,6 +4,7 @@ import * as http from "http";
 
 import Game = require("./game.class");
 import Ship = require("./ships/abstract.ship.class");
+import ShipFactory = require("./ships/ship.factory");
 import Utils = require("../services/utils.service");
 import BSData = require("../definitions/bsdata");
 import Logger = require("../services/logger.service");
@@ -160,7 +161,7 @@ function _placeShips(socket: SocketIO.Socket, ships: Array<BSShip>): Socket {
     if (_isPlaying(socket)) {
         let game = _getGame(socket);
         if (game.state() === BSData.State.SETTING) {
-            if (game.placePlayerShips(socket, Ship.getShips(ships))) {
+            if (game.placePlayerShips(socket, ShipFactory.getShips(ships))) {
                 socket.emit(BSData.events.emit.SHIP_PLACEMENT, true);
                 if (game.state() === BSData.State.PLAYING) {
                     game.emit(_io, BSData.events.emit.GAME_STATE, {state: "new turn"});

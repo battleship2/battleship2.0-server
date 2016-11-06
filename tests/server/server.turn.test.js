@@ -42,8 +42,7 @@ describe('server.turn:', function () {
         game.setPlayerReady(player1, true);
         game.setPlayerReady(player2, true);
         game.setPlayerReady(player3, true);
-        var a = game.placePlayerShips(player1, [new ShipDestroyer(0, 0)]);
-        console.log(a);
+        game.placePlayerShips(player1, [new ShipDestroyer(0, 0)]);
         game.placePlayerShips(player2, [new ShipDestroyer(1, 1)]);
         game.placePlayerShips(player3, [new ShipDestroyer(2, 2)]);
     });
@@ -321,7 +320,7 @@ describe('server.turn:', function () {
         expect(result.actions[1]).to.have.property('owner', 'player2');
         expect(result.actions[2]).to.have.property('owner', 'player3');
 
-        // expect(result.actions[0].result).to.have.length(2);
+        expect(result.actions[0].result).to.have.length(2);
         expect(result.actions[0].result[0]).to.deep.equal({
             type: 'hit ship',
             owner: player3.bs_uuid,
