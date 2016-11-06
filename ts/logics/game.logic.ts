@@ -3,7 +3,7 @@
 import Utils = require("../services/utils.service");
 import BSData = require("../definitions/bsdata");
 import Map = require("../classes/map.class");
-import Ship = require("../classes/entities/entity.ship.class");
+import Ship = require("../classes/ships/abstract.ship.class");
 
 let _utils: Utils = new Utils();
 let _instance: GameLogic = null;
