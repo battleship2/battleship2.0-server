@@ -117,8 +117,11 @@ describe('server.turn:', function () {
     });
 
     it('should return all the players actions at the end of the turn', function () {
-        // one action per turn
         game.map.max = {action: 1};
+
+        var ship3 = new Ship(2, 2, true, BSData.ShipType.BATTLESHIP);
+        game.map.boards[player3.bs_uuid].ships = {};
+        game.map.boards[player3.bs_uuid].ships[ship3.bs_uuid] = ship3;
 
         expect(game.actions).to.deep.equal({});
 
@@ -131,6 +134,35 @@ describe('server.turn:', function () {
         var result = game.playTheTurn();
 
         expect(result.actions).to.have.length(3);
+
+        expect(result.actions[0].result).to.deep.equal([]);
+        expect(result.actions[1].result).to.deep.equal([]);
+        expect(result.actions[2].result).to.deep.equal([]);
+
+        game.setNextActions(player1, [
+            makeBomb(2, 2) // hits player3
+        ]);
+        game.setNextActions(player2, [
+            makeBomb(2, 2) // hits player3
+        ]);
+        game.setNextActions(player3, []);
+
+        result = game.playTheTurn();
+
+        expect(result).to.have.property('actions').to.have.length(2);
+        console.log(result.actions);
+        expect(result.actions[0].result).to.deep.equal([{
+            localHit: {x: 0, y: 0},
+            owner: player3.bs_uuid,
+            target: ship3.bs_uuid,
+            type: 'hit ship'
+        }]);
+        expect(result.actions[1].result).to.deep.equal([{
+            localHit: {x: 0, y: 0},
+            owner: player3.bs_uuid,
+            target: ship3.bs_uuid,
+            type: 'hit ship'
+        }]);
     });
 
     it('should return the round score of the player', function () {
@@ -266,5 +298,68 @@ describe('server.turn:', function () {
         expect(result.players[2]).to.have.property('nickname', 'player3');
         expect(result.players[2]).to.have.property('score', 0);
         expect(result.players[2]).to.have.property('health', 1);
+    });
+
+    it('should indicate if the bomb of a player sank an ship', function () {
+        game.map.max = {action: 1};
+        var ship1 = new Ship(0, 0, true, BSData.ShipType.BATTLESHIP);
+        var ship2 = new Ship(1, 1, true, BSData.ShipType.BATTLESHIP);
+        var ship3 = new Ship(2, 2, true, BSData.ShipType.BATTLESHIP);
+        game.map.boards[player1.bs_uuid].ships = {};
+        game.map.boards[player2.bs_uuid].ships = {};
+        game.map.boards[player3.bs_uuid].ships = {};
+        game.map.boards[player1.bs_uuid].ships[ship1.bs_uuid] = ship1;
+        game.map.boards[player2.bs_uuid].ships[ship2.bs_uuid] = ship2;
+        game.map.boards[player3.bs_uuid].ships[ship3.bs_uuid] = ship3;
+
+        game.setNextActions(player1, [
+            makeBomb(2, 2) // hits player3
+        ]);
+        game.setNextActions(player2, [
+            makeBomb(3, 2) // hits player3
+        ]);
+        game.setNextActions(player3, [
+            makeBomb(0, 0) // hits player1
+        ]);
+
+        var result = game.playTheTurn();
+
+        expect(result.actions[0]).to.have.property('owner', 'player1');
+        expect(result.actions[1]).to.have.property('owner', 'player2');
+        expect(result.actions[2]).to.have.property('owner', 'player3');
+
+        // expect(result.actions[0].result).to.have.length(2);
+        expect(result.actions[0].result[0]).to.deep.equal({
+            type: 'hit ship',
+            owner: player3.bs_uuid,
+            target: ship3.bs_uuid,
+            localHit: {x: 0, y: 0}
+        });
+        expect(result.actions[0].result[1]).to.deep.equal({
+            type: 'sank ship',
+            owner: player3.bs_uuid,
+            target: ship3.bs_uuid
+        });
+
+        expect(result.actions[1].result).to.have.length(2);
+        expect(result.actions[1].result[0]).to.deep.equal({
+            type: 'hit ship',
+            owner: player3.bs_uuid,
+            target: ship3.bs_uuid,
+            localHit: {x: 1, y: 0}
+        });
+        expect(result.actions[1].result[1]).to.deep.equal({
+            type: 'sank ship',
+            owner: player3.bs_uuid,
+            target: ship3.bs_uuid
+        });
+
+        expect(result.actions[2].result).to.have.length(1);
+        expect(result.actions[2].result[0]).to.deep.equal({
+            type: 'hit ship',
+            owner: player1.bs_uuid,
+            target: ship1.bs_uuid,
+            localHit: {x: 0, y: 0}
+        });
     });
 });

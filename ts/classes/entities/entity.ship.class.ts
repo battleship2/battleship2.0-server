@@ -15,9 +15,9 @@ class Ship {
     public hits: Array<BSCoordinates> = [];
     public destroyed: boolean;
 
-    constructor(x: number = 0, y: number = 0, horizontal: boolean = true) {
+    constructor(x: number = 0, y: number = 0, horizontal: boolean = true, type: ShipType = ShipType.BATTLESHIP) {
         this.bs_uuid = _utils.uuid();
-        this.type = ShipType.BATTLESHIP;
+        this.type = type;
         this.coord = {x : x, y : y};
         this.length = Ship.getShipLength(this.type);
         this.dimensions = {
