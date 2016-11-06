@@ -31,9 +31,9 @@ declare namespace SocketIO  {
 }
 
 declare namespace BSData {
-    enum State {}
-    enum ShipType {}
-    enum ActionType {}
+    namespace State {}
+    namespace ShipType {}
+    namespace ActionType {}
 }
 
 /**********************************************************************************/
@@ -41,6 +41,11 @@ declare namespace BSData {
 /*                                    INTERFACES                                  */
 /*                                                                                */
 /**********************************************************************************/
+
+interface BSShipType {
+    name: string;
+    length: number;
+}
 
 interface BSGameData {
     id: string;
@@ -89,7 +94,7 @@ interface BSDimensions extends BSVector2 {}
 interface BSShip {
     x: number;
     y: number;
-    type: BSData.ShipType;
+    type: BSShipType;
     horizontal: boolean;
 }
 
@@ -97,7 +102,7 @@ interface BSAction {
     x: number;
     y: number;
     id: string;
-    type: BSData.ActionType;
+    type: number;
     owner: string;
     result: Array<BSTurnResult>;
 }
@@ -136,12 +141,12 @@ interface BSScore {
 }
 
 interface BSActionAmount {
-    type: BSData.ActionType;
+    type: number;
     amount: number;
 }
 
 interface BSShipAmount {
-    type: BSData.ShipType;
+    type: BSShipType;
     amount: number;
 }
 

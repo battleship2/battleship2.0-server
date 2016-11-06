@@ -1,7 +1,7 @@
 var expect = require('chai').expect,
     GameLogic = require('../../../src/release/logics/game.logic'),
     BSData = require('../../../src/release/definitions/bsdata'),
-    Ship = require('../../../src/release/classes/entities/entity.ship.class'),
+    Ship = require('../../../src/release/classes/ships/abstract.ship.class'),
     Map = require('../../../src/release/classes/map.class');
 
 describe('game.logic:', function () {
@@ -14,9 +14,11 @@ describe('game.logic:', function () {
     var makeShip = function (x, y, type, horizontal) {
         var ship = new Ship();
         ship.setFromBSShip({
-            x: x,
-            y: y,
-            type: type,
+            dimensions: {
+                x: x,
+                y: y
+            },
+            type: function () { return type; },
             horizontal: horizontal
         });
         return ship;

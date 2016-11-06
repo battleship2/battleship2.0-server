@@ -1,10 +1,26 @@
 namespace BSData {
-    export enum State { READY, PLAYING, SETTING, WAITING_PLAYERS }
-    export enum ShipType { CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER }
-    export enum ActionType { BOMB }
+    export namespace State {
+        export const READY: number = 0;
+        export const PLAYING: number = 1;
+        export const SETTING: number = 2;
+        export const WAITING_PLAYERS: number = 3;
+    }
 
-    export let events = {
-        on: {
+    export namespace ShipType {
+        export const CARRIER: BSShipType = { name: "CARRIER", length: 5 };
+        export const CRUISER: BSShipType = { name: "CRUISER", length: 3 };
+        export const ABSTRACT: BSShipType = { name: "ABSTRACT", length: 0 };
+        export const SUBMARINE: BSShipType = { name: "SUBMARINE", length: 3 };
+        export const DESTROYER: BSShipType = { name: "DESTROYER", length: 2 };
+        export const BATTLESHIP: BSShipType = { name: "BATTLESHIP", length: 4 };
+    }
+
+    export namespace ActionType {
+        export const BOMB: number = 0;
+    }
+
+    export namespace events {
+        export const on = {
             READY: "ready",
             MESSAGE: "message",
             JOIN_GAME: "join game",
@@ -14,9 +30,9 @@ namespace BSData {
             LEAVE_GAME: "leave game",
             CREATE_GAME: "create game",
             PLACE_SHIPS: "place ships"
-        },
+        };
 
-        emit: {
+        export const emit = {
             MESSAGE: "message",
             REFUSED: "refused",
             NICKNAME: "nickname",
@@ -32,7 +48,7 @@ namespace BSData {
             GAME_CREATED: "game created",
             PLAYER_READY: "player ready",
             SHIP_PLACEMENT: "ship placement"
-        }
+        };
     };
 }
 

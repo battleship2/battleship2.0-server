@@ -1,19 +1,28 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
 import Utils = require("../services/utils.service");
-import Ship = require("./entities/entity.ship.class");
+import Ship = require("./ships/abstract.ship.class");
 
 let _utils: Utils = new Utils();
 
 class Map {
 
-    public max: {
-        action: number;
-        other: Array<BSActionAmount>;
-    };
+    /**********************************************************************************/
+    /*                                                                                */
+    /*                                  PROPERTIES                                    */
+    /*                                                                                */
+    /**********************************************************************************/
+
+    public max: { action: number; other: Array<BSActionAmount>; };
     public ships: Array<BSShipAmount> = [];
-    public dimensions: BSDimensions;
     public boards: BSMapBoardRegistry;
+    public dimensions: BSDimensions;
+
+    /**********************************************************************************/
+    /*                                                                                */
+    /*                                  CONSTRUCTOR                                   */
+    /*                                                                                */
+    /**********************************************************************************/
 
     constructor (dimensions: BSDimensions) {
         this.dimensions = dimensions;
@@ -23,6 +32,12 @@ class Map {
             other: []
         };
     }
+
+    /**********************************************************************************/
+    /*                                                                                */
+    /*                                PUBLIC MEMBERS                                  */
+    /*                                                                                */
+    /**********************************************************************************/
 
     public setActionsLimit (action: number, other?: Array<BSActionAmount>) {
         this.max.action = action;
@@ -68,20 +83,21 @@ class Map {
         try {
             let check = {};
             _utils.forEach(this.ships, (ship: BSShipAmount) => {
-                if (!_utils.isDefined(check[ship.type])) {
-                    check[ship.type] = {
+                if (!_utils.isDefined(check[ship.type.name])) {
+                    check[ship.type.name] = {
                         expected: 0,
                         result: 0
                     };
                 }
-                check[ship.type].expected += ship.amount;
+                check[ship.type.name].expected += ship.amount;
             });
 
-            _utils.forEach(ships, (ship: BSShip) => {
-                if (_utils.isUndefined(check[ship.type])) {
+            _utils.forEach(ships, (ship: Ship) => {
+                let type = ship.type().name;
+                if (_utils.isUndefined(check[type])) {
                     throw new Error();
                 }
-                check[ship.type].result += 1;
+                check[type].result += 1;
             });
 
             _utils.forEach(check, element => {
@@ -115,6 +131,12 @@ class Map {
         return true;
     }
 }
+
+/**********************************************************************************/
+/*                                                                                */
+/*                               PRIVATE MEMBERS                                  */
+/*                                                                                */
+/**********************************************************************************/
 
 function _shipIsWithinBoundaries(map: Map, ship: Ship): boolean {
     return (ship.coord.x >= 0 && (ship.coord.x + ship.dimensions.x - 1) < map.dimensions.x) &&

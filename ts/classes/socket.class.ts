@@ -2,6 +2,7 @@
 
 import * as http from "http";
 import Game = require("./game.class");
+import Ship = require("./ships/abstract.ship.class");
 import Utils = require("../services/utils.service");
 import Logger = require("../services/logger.service");
 import BSData = require("../definitions/bsdata");
@@ -133,7 +134,7 @@ function _playTurn(socket: SocketIO.Socket, bomb: Array<BSAction>): Socket {
     return _instance;
 }
 
-function _placeShips(socket: SocketIO.Socket, ships: Array<BSShip>): Socket {
+function _placeShips(socket: SocketIO.Socket, ships: Array<Ship>): Socket {
     if (_isPlaying(socket)) {
         let game = _getGame(socket);
         if (game.state() === BSData.State.SETTING) {

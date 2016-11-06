@@ -1,10 +1,10 @@
 /// <reference path="../definitions/definitions.d.ts" />
 
+import Map = require("./map.class");
+import Ship = require("./ships/abstract.ship.class");
 import Utils = require("../services/utils.service");
 import BSData = require("../definitions/bsdata");
 import GameLogic = require("../logics/game.logic");
-import Map = require("./map.class");
-import Ship = require("./entities/entity.ship.class");
 
 let _utils: Utils = new Utils();
 
@@ -27,7 +27,7 @@ class Game {
     public socketRoomName: string = "UNNAMED";
 
     private _id: string = _utils.uuid();
-    private _state: BSData.State = BSData.State.WAITING_PLAYERS;
+    private _state: number = BSData.State.WAITING_PLAYERS;
 
     /**********************************************************************************/
     /*                                                                                */
@@ -51,8 +51,7 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public state = (__state?: BSData.State) : BSData.State => {
-
+    public state = (__state?: number) : number => {
         if (_utils.isUndefined(__state)) {
             return this._state;
         }
@@ -167,9 +166,9 @@ class Game {
         return this;
     };
 
-    public placePlayerShips = (socket: SocketIO.Socket, raw_ships: Array<BSShip>) : boolean => {
+    public placePlayerShips = (socket: SocketIO.Socket, raw_ships: Array<Ship>) : boolean => {
         let ships = [];
-        _utils.forEach(raw_ships, (raw_ship: BSShip) => {
+        _utils.forEach(raw_ships, (raw_ship: Ship) => {
             let ship = new Ship();
             ship.setFromBSShip(raw_ship);
             ships.push(ship);
