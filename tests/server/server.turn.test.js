@@ -1,7 +1,7 @@
 var expect = require('chai').expect,
     sinon = require('sinon'),
     BSData = require('../../src/release/definitions/bsdata'),
-    Ship = require('../../src/release/classes/entities/entity.ship.class'),
+    Ship = require('../../src/release/classes/ships/abstract.ship.class'),
     Game = require('../../src/release/classes/game.class');
 
 describe('server.turn:', function () {
@@ -23,9 +23,11 @@ describe('server.turn:', function () {
 
     var makeDestroyer = function (x, y) {
         return {
-            x: x,
-            y: y,
-            type: BSData.ShipType.DESTROYER,
+            dimensions: {
+                x: x,
+                y: y
+            },
+            type: function () { return BSData.ShipType.DESTROYER; },
             horizontal: true
         };
     };
