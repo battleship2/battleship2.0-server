@@ -51,9 +51,9 @@ class GameLogic {
 
     public processTurn = (map: Map, playersActions: BSActionRegistry): Array<BSAction> => {
         let actionsResults: Array<BSAction> = [];
-        _utils.forEach(playersActions, (actions: Array<BSAction>, nickname: string) => {
+        _utils.forEach(playersActions, (actions: Array<BSAction>, bs_uuid: string) => {
             _utils.forEach(actions, (action: BSAction) => {
-                actionsResults.push(_processAction(nickname, action, map.boards));
+                actionsResults.push(_processAction(bs_uuid, action, map.boards));
             });
         });
         return actionsResults;
@@ -67,28 +67,28 @@ class GameLogic {
 /*                                                                                */
 /**********************************************************************************/
 
-function _processAction(nickname: string, playerAction: BSAction, boards: BSMapBoardRegistry): BSAction {
+function _processAction(bs_uuid: string, playerAction: BSAction, boards: BSMapBoardRegistry): BSAction {
     let action: BSAction = {
         x: playerAction.x,
         y: playerAction.y,
         id: playerAction.id,
         type: playerAction.type,
-        owner: nickname,
+        owner: bs_uuid,
         result: []
     };
 
     switch (playerAction.type) {
         case BSData.ActionType.BOMB:
-            action.result = _processBomb(nickname, playerAction, boards);
+            action.result = _processBomb(bs_uuid, playerAction, boards);
             break;
     }
     return action;
 }
 
-function _processBomb(nickname: string, bomb: BSAction, boards: BSMapBoardRegistry): Array<BSTurnResult> {
+function _processBomb(bs_uuid: string, bomb: BSAction, boards: BSMapBoardRegistry): Array<BSTurnResult> {
     let result = [];
     _utils.forEach(boards, (board: BSMapBoard, player: string) => {
-        if (player === nickname) {
+        if (player === bs_uuid) {
             return;
         }
 

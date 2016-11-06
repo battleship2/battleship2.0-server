@@ -3,11 +3,11 @@ var expect = require('chai').expect,
     bsdata = require('../../src/release/definitions/bsdata'),
     Game = require('../../src/release/classes/game.class');
 
-describe('game', function () {
+describe('server.game:', function () {
     var mockPlayer,
         game;
 
-    describe('player trying to join', function () {
+    describe('[Player trying to join]', function () {
         beforeEach(function (done) {
             game = new Game(1, 'test', 5);
             mockPlayer = {
@@ -18,12 +18,12 @@ describe('game', function () {
             done();
         });
 
-        it("should accept a player when the game is public (no password)", function () {
+        it('should accept a player when the game is public (no password)', function () {
             var result = game.acceptPlayer(mockPlayer, {});
             expect(result).to.be.true;
         });
 
-        it("should refuse a player if he does not provide the correct password", function () {
+        it('should refuse a player if he does not provide the correct password', function () {
             game.password = 'the password';
             var conf = {};
             var result = game.acceptPlayer(mockPlayer, conf);
@@ -33,7 +33,7 @@ describe('game', function () {
             expect(result).to.be.true;
         });
 
-        it("should refuse a player if the game's state isn't WAITING_PLAYERS", function () {
+        it('should refuse a player if the state of the game is not WAITING_PLAYERS', function () {
             game.state(bsdata.State.WAITING_PLAYERS);
             var result = game.acceptPlayer(mockPlayer, {});
             expect(result).to.be.true;
@@ -45,7 +45,7 @@ describe('game', function () {
             expect(result).to.be.false;
         });
 
-        it("should refuse a player if the limit of players is reached in the game", function () {
+        it('should refuse a player if the limit of players is reached in the game', function () {
             game = new Game('3 players', 3);
             game.players = {
                 'Huey': {},
@@ -56,7 +56,7 @@ describe('game', function () {
             expect(result).to.be.false;
         });
 
-        it("shoud refuse a player wich is already in an other game", function () {
+        it('shoud refuse a player wich is already in an other game', function () {
             mockPlayer.game = 2;
             var result = game.acceptPlayer(mockPlayer, {});
             expect(result).to.be.false;
@@ -66,12 +66,12 @@ describe('game', function () {
         });
     });
 
-    describe('player in game', function () {
+    describe('[Player in game]', function () {
 
         beforeEach(function () {
             game = new Game('test', 5);
             mockPlayer = {
-                id: 'titi',
+                bs_uuid: 'titi',
                 nickname: 'testing dude',
                 game: null,
                 join: function () {},
@@ -79,14 +79,14 @@ describe('game', function () {
             };
         });
 
-        it("should set the game property of the player when he is joining", function () {
+        it('should set the game property of the player when he is joining', function () {
             game.addPlayer(mockPlayer);
             expect(mockPlayer).to.have.property('game').to.equal(game.getId());
-            expect(game.players).to.have.property(mockPlayer.nickname);
             expect(Object.keys(game.players)).to.have.length(1);
+            expect(game.players).to.have.property(mockPlayer.bs_uuid);
         });
 
-        it("should add the new player to the game's room and leave lobby", function () {
+        it('should add the new player to the room of the game and leave lobby', function () {
             mockPlayer.join = sinon.spy();
             mockPlayer.leave = sinon.spy();
             game.addPlayer(mockPlayer);
@@ -96,7 +96,7 @@ describe('game', function () {
             expect(result).to.be.true;
         });
 
-        it("should set the game's state to READY when the number of player is reached", function () {
+        it('should set the state of the game to READY when the number of player is reached', function () {
             game = new Game('2 players', 2);
             expect(game.state()).to.equal(bsdata.State.WAITING_PLAYERS);
             game.players = {
@@ -107,14 +107,14 @@ describe('game', function () {
             expect(game.state()).to.equal(bsdata.State.READY);
         });
 
-        it("should set the game's state to SETTING when every players are ready", function () {
+        it('should set the state of the game to SETTING when every players are ready', function () {
             game = new Game('2 players', 2);
             game.players = {
                 'Sonic': { isReady: true },
                 'Tails': { isReady: false }
             };
             game.state(bsdata.State.READY);
-            mockPlayer.nickname = 'Tails';
+            mockPlayer.bs_uuid = 'Tails';
             game.setPlayerReady(mockPlayer, true);
             expect(game.state()).to.equal(bsdata.State.SETTING);
             expect(game.players['Sonic']).to.have.property('isReady').to.equal(true);
@@ -122,7 +122,7 @@ describe('game', function () {
         });
     });
 
-    describe("player leaving game", function () {
+    describe('[Player leaving game]', function () {
 
         beforeEach(function () {
             game = new Game('test', 5);
@@ -135,7 +135,7 @@ describe('game', function () {
             };
         });
 
-        it("should make the player leave the room when he leave", function () {
+        it('should make the player leave the room when he leave', function () {
             mockPlayer.join = sinon.spy();
             mockPlayer.leave = sinon.spy();
             mockPlayer.nickname = 'party pooper';
@@ -149,9 +149,9 @@ describe('game', function () {
             expect(result).to.be.true;
         });
 
-        it("should change from READY to WAITING_PLAYERS when a player leaves the game", function () {
+        it('should change from READY to WAITING_PLAYERS when a player leaves the game', function () {
             game = new Game('not ready', 2);
-            mockPlayer.nickname = 'pac-man';
+            mockPlayer.bs_uuid = 'pac-man';
             game.players = {
                 'blanca': {},
                 'pac-man': mockPlayer
@@ -162,9 +162,9 @@ describe('game', function () {
             expect(game.players).to.not.have.property('pac-man');
         });
 
-        it("should keep state PLAYING even if a player is leaving", function () {
+        it('should keep state PLAYING even if a player is leaving', function () {
             game = new Game('playing', 3);
-            mockPlayer.nickname = 'Mario';
+            mockPlayer.bs_uuid = 'Mario';
             game.players = {
                 'Mario': {},
                 'Peach': {},

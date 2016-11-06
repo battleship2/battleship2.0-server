@@ -6,7 +6,7 @@ var expect = require('chai').expect,
 
 require('events').EventEmitter.prototype._maxListeners = 100;
 
-describe('chat', function () {
+describe('server.chat:', function () {
 
     var server, socket,
         clientA, clientB, clientC,
@@ -39,7 +39,7 @@ describe('chat', function () {
         server.close();
     });
 
-    it("should dispatch a player's message to others in the lobby", function (done) {
+    it('should dispatch a the message of a player to others in the lobby', function (done) {
         var nicknameA;
         var messageCounter = 0;
 
@@ -60,7 +60,7 @@ describe('chat', function () {
         clientC.on('message', receiveMessage);
     });
 
-    it("should only dispatch a message to players of the same game", function (done) {
+    it('should only dispatch a message to players of the same game', function (done) {
         var nicknameA,
             messageCounter = 0;
 
@@ -74,13 +74,13 @@ describe('chat', function () {
         });
 
         clientB.on('new player', function () {
-            clientA.emit('message', "yo! what's up?");
+            clientA.emit('message', 'yo!');
         });
 
 
         var receiveMessage = function (data) {
             expect(data.nickname).to.equal(nicknameA);
-            expect(data.message).to.equal("yo! what's up?");
+            expect(data.message).to.equal('yo!');
             messageCounter++;
             if (messageCounter === 2) done();
         };

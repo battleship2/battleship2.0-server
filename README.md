@@ -28,7 +28,7 @@ To launch all the tests, type the following command:
 `gulp test` or `npm test`
 
 ### Testing in a browser
-First, run the server using the [Launch](https://github.com/battleship2/battleship2.0-server#launch) section abive.
+First, run the server using the [Launch](https://github.com/battleship2/battleship2.0-server#launch) section above.
 Then, in your favorite browser, open the `index.html` file located under `www` to launch a 4 players game.
 
 ## Docker

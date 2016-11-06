@@ -50,9 +50,10 @@ class Socket {
 
         _io.sockets.on("connection", (socket: SocketIO.Socket) => {
             socket.game = null;
-            socket.nickname = _getNickname();
+            socket.bs_uuid = _utils.uuid();
+            socket.nickname = _nickname.get();
 
-            _buffer.sockets[socket.nickname] = socket;
+            _buffer.sockets[socket.bs_uuid] = socket;
 
             socket.join("lobby");
             socket.emit(BSData.events.emit.NICKNAME, socket.nickname);
@@ -73,6 +74,8 @@ class Socket {
 
             // Chat related events
             socket.on(BSData.events.on.MESSAGE, _message.bind(_instance, socket));
+
+            _logger.debug("Socket connected [%s]: %s", socket.bs_uuid, socket.nickname);
         });
 
         return _instance;
@@ -203,13 +206,6 @@ function _leaveGame(socket: SocketIO.Socket): Socket {
     return _instance;
 }
 
-function _getNickname(): string {
-    let nickname = "";
-    do { nickname = _nickname.get(); }
-    while (nickname in _buffer.sockets);
-    return nickname;
-}
-
 function _isPlaying(socket: SocketIO.Socket): boolean {
     return _utils.isString(socket.game) && socket.game in _buffer.games;
 }
@@ -229,7 +225,7 @@ function _disconnect(socket: SocketIO.Socket): Socket {
     if (_isPlaying(socket)) {
         _getGame(socket).removePlayer(socket);
     }
-    delete _buffer.sockets[socket.nickname];
+    delete _buffer.sockets[socket.bs_uuid];
     return _instance;
 }
 

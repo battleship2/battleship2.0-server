@@ -4,7 +4,7 @@ var expect = require('chai').expect,
     Ship = require('../../../src/release/classes/entities/entity.ship.class'),
     Map = require('../../../src/release/classes/map.class');
 
-describe('basic game mechanics', function () {
+describe('game.logic:', function () {
 
     var mechanics = new GameLogic();
     var ships = [],
@@ -30,7 +30,7 @@ describe('basic game mechanics', function () {
         };
     };
 
-    describe('ships settings', function () {
+    describe('[Ships settings]', function () {
 
         var isValid = mechanics.isDispositionValid;
 
@@ -141,7 +141,7 @@ describe('basic game mechanics', function () {
         });
     });
 
-    describe('bombs position', function () {
+    describe('[Bombs position]', function () {
 
         var isValid = mechanics.isActionsValid;
 
@@ -214,7 +214,7 @@ describe('basic game mechanics', function () {
         })
     });
 
-    describe('process turn (bomb)', function () {
+    describe('[Process turn (bomb)]', function () {
 
         var processTurn = mechanics.processTurn,
             map,

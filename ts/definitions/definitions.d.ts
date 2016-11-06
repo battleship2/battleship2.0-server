@@ -25,6 +25,7 @@ declare namespace SocketIO  {
     interface Socket {
         id: string;
         game: string;
+        bs_uuid: string;
         nickname: string;
     }
 }
@@ -65,9 +66,11 @@ interface BSBuffer {
 interface BSPlayer {
     score: number;
     isReady: boolean;
+    nickname: string;
 }
 
 interface BSPlayerInfo {
+    id: string;
     score: number;
     health: number;
     nickname: string;
@@ -121,6 +124,12 @@ interface BSTurnResult {
     localHit: BSCoordinates;
 }
 
+interface BSTurn {
+    actions: Array<BSAction>;
+    players: Array<BSPlayerInfo>;
+    turnScores: BSScoreRegistry;
+}
+
 interface BSScore {
     miss: number;
     score: number;
@@ -147,23 +156,23 @@ interface BSShipRegistry {
 }
 
 interface BSActionRegistry {
-    [nickname: string]: Array<BSAction>;
+    [bs_uuid: string]: Array<BSAction>;
 }
 
 interface BSMapBoardRegistry {
-    [nickname: string]: BSMapBoard;
+    [bs_uuid: string]: BSMapBoard;
 }
 
 interface BSSocketRegistry {
-    [nickname: string]: SocketIO.Socket;
+    [bs_uuid: string]: SocketIO.Socket;
 }
 
 interface BSPlayerRegistry {
-    [nickname: string]: BSPlayer;
+    [bs_uuid: string]: BSPlayer;
 }
 
 interface BSScoreRegistry {
-    [owner: string]: BSScore;
+    [bs_uuid: string]: BSScore;
 }
 
 interface BSGameRegistry {
