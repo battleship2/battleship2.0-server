@@ -42,8 +42,8 @@ describe('server.socket:', function () {
     });
 
     it('should give a nickname to a connecting socket', function (done) {
-        clientA.on('nickname', function (nickname) {
-            expect(nickname.length).to.be.gt(0);
+        clientA.on('nickname', function (data) {
+            expect(data.nickname.length).to.be.gt(0);
             done();
         });
     });

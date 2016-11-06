@@ -39,20 +39,19 @@ describe('server.chat:', function () {
         server.close();
     });
 
-    it('should dispatch a the message of a player to others in the lobby', function (done) {
+    it('should dispatch the message of a player to others in the lobby', function (done) {
         var nicknameA;
         var messageCounter = 0;
 
-        clientA.on('nickname', function (nickname) {
-            nicknameA = nickname;
+        clientA.on('nickname', function (data) {
+            nicknameA = data.nickname;
             clientA.emit('message', 'hello!');
         });
 
         var receiveMessage = function (data) {
             expect(data.nickname).to.equal(nicknameA);
             expect(data.message).to.equal('hello!');
-            messageCounter++;
-            if (messageCounter === 3) done();
+            if (++messageCounter === 3) done();
         };
 
         clientA.on('message', receiveMessage);
@@ -64,8 +63,8 @@ describe('server.chat:', function () {
         var nicknameA,
             messageCounter = 0;
 
-        clientA.on('nickname', function (nickname) {
-            nicknameA = nickname;
+        clientA.on('nickname', function (data) {
+            nicknameA = data.nickname;
             clientA.emit('create game', {name: 'toto', maxPlayers: 4});
         });
 
@@ -81,8 +80,7 @@ describe('server.chat:', function () {
         var receiveMessage = function (data) {
             expect(data.nickname).to.equal(nicknameA);
             expect(data.message).to.equal('yo!');
-            messageCounter++;
-            if (messageCounter === 2) done();
+            if (++messageCounter === 2) done();
         };
 
         clientA.on('message', receiveMessage);
