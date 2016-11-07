@@ -107,6 +107,7 @@ class Game {
 
         _updateBoards.call(this, actions);
         _updatePlayersInfos.call(this, scores);
+        _updateActionsResult.call(this, actions);
 
         this.history.push(JSON.parse(JSON.stringify(this.actions)));
         this.actions = {};
@@ -330,7 +331,7 @@ function _updateBoards(actions: Array<BSAction>): Game {
 
                 if (!alreadyRegistered) {
                     ship.hits.push(result.localHit);
-                    if (ship.hits.length === ship.width * ship.height) {
+                    if (ship.hits.length === ship.size) {
                         ship.destroyed = true;
                     }
                 }
@@ -346,6 +347,26 @@ function _updatePlayersInfos(scores: BSScoreRegistry): Game {
         this.players[bs_uuid].score += score.score;
     });
     return this;
+}
+
+function _updateActionsResult(actions: Array<BSAction>): void {
+    _utils.forEach(actions, (action: BSAction, index: number) => {
+        let additionals: Array<BSTurnResult> = [];
+        _utils.forEach(action.result, (result: BSTurnResult) => {
+            if (result.type === "hit ship") {
+                if (this.map.boards[result.owner].ships[result.target].destroyed) {
+                    additionals.push({
+                        type: "sink ship",
+                        owner: result.owner,
+                        target: result.target
+                    });
+                }
+            }
+        });
+        _utils.forEach(additionals, (additional: BSTurnResult) => {
+            actions[index].result.push(additional);
+        });
+    });
 }
 
 export = Game;

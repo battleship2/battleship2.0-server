@@ -292,11 +292,11 @@ describe('server.turn:', function () {
         expect(result.players[2]).to.have.property('health', 1);
     });
 
-    it('should indicate if the bomb of a player sank an ship', function () {
+    it('should indicate if the bomb of a player sink a ship', function () {
         game.map.max = {action: 1};
-        var ship1 = new ShipBattleship(0, 0, true);
-        var ship2 = new ShipBattleship(1, 1, true);
-        var ship3 = new ShipBattleship(2, 2, true);
+        var ship1 = new ShipDestroyer(0, 0, true);
+        var ship2 = new ShipDestroyer(1, 1, true);
+        var ship3 = new ShipDestroyer(2, 2, true);
         game.map.boards[player1.bs_uuid].ships = {};
         game.map.boards[player2.bs_uuid].ships = {};
         game.map.boards[player3.bs_uuid].ships = {};
@@ -328,7 +328,7 @@ describe('server.turn:', function () {
             localHit: {x: 0, y: 0}
         });
         expect(result.actions[0].result[1]).to.deep.equal({
-            type: 'sank ship',
+            type: 'sink ship',
             owner: player3.bs_uuid,
             target: ship3.bs_uuid
         });
@@ -341,7 +341,7 @@ describe('server.turn:', function () {
             localHit: {x: 1, y: 0}
         });
         expect(result.actions[1].result[1]).to.deep.equal({
-            type: 'sank ship',
+            type: 'sink ship',
             owner: player3.bs_uuid,
             target: ship3.bs_uuid
         });

@@ -126,7 +126,7 @@ interface BSTurnResult {
     type: string;
     owner: string;
     target: string;
-    localHit: BSCoordinates;
+    localHit?: BSCoordinates;
 }
 
 interface BSTurn {
