@@ -107,9 +107,10 @@
         return String.fromCharCode(point.x + 65) + (point.y + 1);
     }
 
-    socket.on('nickname', function (nickname) {
-        socket.nickname = nickname;
-        document.querySelector('h1').textContent = nickname;
+    socket.on('nickname', function (data) {
+        socket.nickname = data.nickname;
+        socket.bs_uuid = data.id;
+        document.querySelector('h1').textContent = data.nickname;
         window.setTimeout(function () {
             socket.emit('list games');
         }, Math.random() * 3000);
@@ -195,7 +196,7 @@
         var dispositions = [{
             x: 0,
             y: 0,
-            type: 4, // BSData.ShipType.DESTROYER
+            type: 'DESTROYER', // BSData.ShipType.DESTROYER
             horizontal: true
         }];
         socket.emit('place ships', dispositions);
