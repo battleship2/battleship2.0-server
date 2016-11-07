@@ -45,6 +45,10 @@ class Ship {
     /*                                                                                */
     /**********************************************************************************/
 
+    public health = (): number => {
+        return this.size - this.hits.length;
+    };
+
     public type = (_type?: string): string =>  {
         if (_utils.isUndefined(_type)) {
             return this._type;

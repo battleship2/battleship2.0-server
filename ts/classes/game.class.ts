@@ -133,10 +133,8 @@ class Game {
             };
 
             _utils.forEach(board.ships, (ship: Ship) => {
-                let shipHealth = ship.dimensions.x * ship.dimensions.y;
-                playerInfo.maxHealth += shipHealth;
-                if (ship.destroyed) return;
-                playerInfo.health += (shipHealth - ship.hits.length);
+                playerInfo.maxHealth += ship.size;
+                playerInfo.health += ship.health();
             });
             infos.push(playerInfo);
         });
