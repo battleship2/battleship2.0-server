@@ -57,18 +57,6 @@ class Ship {
         return this._type;
     };
 
-    public setFromBSShip = (ship: Ship): Ship => {
-        this._type = ship.type();
-        this.coord = {x : ship.dimensions.x, y : ship.dimensions.y};
-        this.dimensions = {
-            x : ship.horizontal ? this._type.length : 1,
-            y : ship.horizontal ? 1 : this._type.length
-        };
-        this.hits = [];
-        this.destroyed = false;
-        return this;
-    };
-
     public isAffectedByAction = (action: BSAction): boolean | BSCoordinates => {
         if (this.destroyed) {
             return false;
