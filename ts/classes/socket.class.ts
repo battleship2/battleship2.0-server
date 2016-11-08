@@ -86,8 +86,10 @@ class Socket {
 
             // Chat related events
             socket.on(BSData.events.on.MESSAGE, _message.bind(_instance, socket));
+            socket.on(BSData.events.on.SOMEONE_IS_WRITING, _someoneIsWriting.bind(_instance, socket));
+            socket.on(BSData.events.on.SOMEONE_STOPPED_WRITING, _someoneStoppedWriting.bind(_instance, socket));
 
-            _logger.debug("Socket connected [%s]: %s", socket.bs_uuid, socket.nickname);
+            // _logger.debug("Socket connected [%s]: %s", socket.bs_uuid, socket.nickname);
         });
 
         return _instance;
@@ -112,10 +114,35 @@ class Socket {
 /*                                                                                */
 /**********************************************************************************/
 
-function _makeSafeStringOf(value: string): string {
-    return String(value).replace(/[&<>"'\/]/g, (s: string) => {
-        return _entityMap[s];
-    });
+function _dispatch(event: string, messageData: any, socket: SocketIO.Socket): Socket {
+    if (_isPlaying(socket)) {
+        let game = _getGame(socket);
+        game.emit(_io, event, messageData);
+    } else {
+        _io.sockets.in("lobby").emit(event, messageData);
+    }
+
+    return _instance;
+}
+
+function _handleWriting(event: string, socket: SocketIO.Socket): Socket {
+    let messageData = {
+        id: socket.bs_uuid,
+        nickname: socket.nickname
+    };
+
+    _dispatch(event, messageData, socket);
+    return _instance;
+}
+
+function _someoneIsWriting(socket: SocketIO.Socket): Socket {
+    _handleWriting(BSData.events.emit.SOMEONE_IS_WRITING, socket);
+    return _instance;
+}
+
+function _someoneStoppedWriting(socket: SocketIO.Socket): Socket {
+    _handleWriting(BSData.events.emit.SOMEONE_STOPPED_WRITING, socket);
+    return _instance;
 }
 
 function _message(socket: SocketIO.Socket, message: string): Socket {
@@ -131,13 +158,14 @@ function _message(socket: SocketIO.Socket, message: string): Socket {
         nickname: socket.nickname
     };
 
-    if (_isPlaying(socket)) {
-        let game = _getGame(socket);
-        game.emit(_io, BSData.events.emit.MESSAGE, messageData);
-    } else {
-        _io.sockets.in("lobby").emit(BSData.events.emit.MESSAGE, messageData);
-    }
+    _dispatch(BSData.events.emit.MESSAGE, messageData, socket);
     return _instance;
+}
+
+function _makeSafeStringOf(value: string): string {
+    return String(value).replace(/[&<>"'\/]/g, (s: string) => {
+        return _entityMap[s];
+    });
 }
 
 function _playTurn(socket: SocketIO.Socket, bomb: Array<BSAction>): Socket {
