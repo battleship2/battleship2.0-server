@@ -42,6 +42,11 @@ declare namespace BSData {
 /*                                                                                */
 /**********************************************************************************/
 
+interface People {
+    id: string;
+    nickname: string;
+}
+
 interface BSShipType {
     name: string;
     length: number;

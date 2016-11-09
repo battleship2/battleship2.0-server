@@ -28,6 +28,7 @@ class Game {
 
     private _id: string = _utils.uuid();
     private _state: number = BSData.State.WAITING_PLAYERS;
+    private _peopleWriting: { [peopleId: string]: People } = {};
 
     /**********************************************************************************/
     /*                                                                                */
@@ -50,6 +51,28 @@ class Game {
     /*                                PUBLIC MEMBERS                                  */
     /*                                                                                */
     /**********************************************************************************/
+
+    public handlePeopleWriting = (io: SocketIO.Server, status: string, socket: SocketIO.Socket) : Game => {
+        switch (status) {
+            case "STOPPED_WRITING":
+                if (_utils.isDefined(this._peopleWriting[socket.bs_uuid])) {
+                    delete this._peopleWriting[socket.bs_uuid];
+                }
+                break;
+
+            case "IS_WRITING":
+                if (_utils.isUndefined(this._peopleWriting[socket.bs_uuid])) {
+                    this._peopleWriting[socket.bs_uuid] = {
+                        id: socket.bs_uuid,
+                        nickname: socket.nickname
+                    };
+                }
+        }
+
+        io.sockets.in(this.socketRoomName).emit(BSData.events.emit.PEOPLE_WRITING, this._peopleWriting);
+
+        return this;
+    };
 
     public state = (__state?: number) : number => {
         if (_utils.isUndefined(__state)) {

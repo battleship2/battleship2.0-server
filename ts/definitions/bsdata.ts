@@ -38,6 +38,8 @@ namespace BSData {
             MESSAGE: "message",
             REFUSED: "refused",
             NICKNAME: "nickname",
+            LEFT_ROOM: "left room",
+            JOIN_ROOM: "join room",
             GAME_LEFT: "game left",
             PLAY_TURN: "play turn",
             NEW_ROUND: "new round",
@@ -50,8 +52,8 @@ namespace BSData {
             GAME_CREATED: "game created",
             PLAYER_READY: "player ready",
             SHIP_PLACEMENT: "ship placement",
-            SOMEONE_IS_WRITING: "someone is writing",
-            SOMEONE_STOPPED_WRITING: "someone stopped writing"
+            PEOPLE_WRITING: "people writing",
+            PEOPLE_IN_ROOM: "people in room"
         };
     }
 }

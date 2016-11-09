@@ -14,18 +14,13 @@ let __io: SocketIOStatic = require("socket.io");
 let _io: SocketIO.Server = null;
 let _utils: Utils = new Utils();
 let _logger: Logger = null;
-let _buffer: BSBuffer = { sockets: {}, games: {} };
+let _buffer: BSBuffer = {sockets: {}, games: {}};
 let _instance: Socket = null;
 let _nickname: Nickname = new Nickname();
+let _peopleInLobby: { [peopleId: string]: People } = {};
+let _peopleWritingInLobby: { [peopleId: string]: People } = {};
 
-const _entityMap: { [symbol: string]: string } = {
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;",
-    "/": "&#x2F;"
-};
+const _entityMap: { [symbol: string]: string } = { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;", "/": "&#x2F;" };
 
 class Socket {
 
@@ -67,8 +62,20 @@ class Socket {
 
             _buffer.sockets[socket.bs_uuid] = socket;
 
+            let messageData = {
+                id: socket.bs_uuid,
+                nickname: socket.nickname
+            };
+
+            _peopleInLobby[socket.bs_uuid] = messageData;
+
             socket.join("lobby");
-            socket.emit(BSData.events.emit.NICKNAME, { id: socket.bs_uuid, nickname: socket.nickname });
+
+            socket.emit(BSData.events.emit.NICKNAME, {id: socket.bs_uuid, nickname: socket.nickname});
+            socket.emit(BSData.events.emit.PEOPLE_WRITING, _peopleWritingInLobby);
+
+            _dispatch(BSData.events.emit.JOIN_ROOM, socket, messageData);
+            _dispatch(BSData.events.emit.PEOPLE_IN_ROOM, socket, _peopleInLobby);
 
             // Player related events
             socket.on(BSData.events.on.DISCONNECT, _disconnect.bind(_instance, socket));
@@ -114,34 +121,59 @@ class Socket {
 /*                                                                                */
 /**********************************************************************************/
 
-function _dispatch(event: string, messageData: any, socket: SocketIO.Socket): Socket {
+function _dispatch(event: string, socket: SocketIO.Socket, messageData?: any): Socket {
     if (_isPlaying(socket)) {
         let game = _getGame(socket);
-        game.emit(_io, event, messageData);
+
+        if (_utils.isUndefined(messageData)) {
+            game.emit(_io, event);
+        } else {
+            game.emit(_io, event, messageData);
+        }
     } else {
-        _io.sockets.in("lobby").emit(event, messageData);
+        if (_utils.isUndefined(messageData)) {
+            _io.sockets.in("lobby").emit(event);
+        } else {
+            _io.sockets.in("lobby").emit(event, messageData);
+        }
     }
 
     return _instance;
 }
 
-function _handleWriting(event: string, socket: SocketIO.Socket): Socket {
-    let messageData = {
-        id: socket.bs_uuid,
-        nickname: socket.nickname
-    };
+function _handleWriting(status: string, socket: SocketIO.Socket): Socket {
+    if (_isPlaying(socket)) {
+        _getGame(socket).handlePeopleWriting(_io, status, socket);
+    } else {
+        switch (status) {
+            case "STOPPED_WRITING":
+                if (_utils.isDefined(_peopleWritingInLobby[socket.bs_uuid])) {
+                    delete _peopleWritingInLobby[socket.bs_uuid];
+                }
+                break;
 
-    _dispatch(event, messageData, socket);
+            case "IS_WRITING":
+                if (_utils.isUndefined(_peopleWritingInLobby[socket.bs_uuid])) {
+                    _peopleWritingInLobby[socket.bs_uuid] = {
+                        id: socket.bs_uuid,
+                        nickname: socket.nickname
+                    };
+                }
+        }
+
+        _io.sockets.in("lobby").emit(BSData.events.emit.PEOPLE_WRITING, _peopleWritingInLobby);
+    }
+
     return _instance;
 }
 
 function _someoneIsWriting(socket: SocketIO.Socket): Socket {
-    _handleWriting(BSData.events.emit.SOMEONE_IS_WRITING, socket);
+    _handleWriting("IS_WRITING", socket);
     return _instance;
 }
 
 function _someoneStoppedWriting(socket: SocketIO.Socket): Socket {
-    _handleWriting(BSData.events.emit.SOMEONE_STOPPED_WRITING, socket);
+    _handleWriting("STOPPED_WRITING", socket);
     return _instance;
 }
 
@@ -158,7 +190,7 @@ function _message(socket: SocketIO.Socket, message: string): Socket {
         nickname: socket.nickname
     };
 
-    _dispatch(BSData.events.emit.MESSAGE, messageData, socket);
+    _dispatch(BSData.events.emit.MESSAGE, socket, messageData);
     return _instance;
 }
 
@@ -274,9 +306,21 @@ function _getGame(socket: SocketIO.Socket): Game {
 }
 
 function _disconnect(socket: SocketIO.Socket): Socket {
+    let messageData = {
+        id: socket.bs_uuid,
+        nickname: socket.nickname
+    };
+
+    delete _peopleInLobby[socket.bs_uuid];
+
+    _handleWriting("STOPPED_WRITING", socket);
+    _dispatch(BSData.events.emit.LEFT_ROOM, socket, messageData);
+    _dispatch(BSData.events.emit.PEOPLE_IN_ROOM, socket, _peopleInLobby);
+
     if (_isPlaying(socket)) {
         _getGame(socket).removePlayer(socket);
     }
+
     delete _buffer.sockets[socket.bs_uuid];
     return _instance;
 }
