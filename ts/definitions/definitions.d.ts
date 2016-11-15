@@ -21,19 +21,14 @@ declare namespace NodeJS  {
     }
 }
 
-declare namespace SocketIO  {
-    interface Socket {
-        id: string;
-        game: string;
-        bs_uuid: string;
-        nickname: string;
-    }
-}
-
 declare namespace BSData {
     namespace State {}
     namespace ShipType {}
     namespace ActionType {}
+}
+
+declare class Socket {
+    leave(room: string);
 }
 
 /**********************************************************************************/
@@ -75,6 +70,7 @@ interface BSBuffer {
 
 interface BSPlayer {
     score: number;
+    socket: Socket;
     isReady: boolean;
     nickname: string;
 }

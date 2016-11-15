@@ -13,10 +13,9 @@ class Map {
     /*                                                                                */
     /**********************************************************************************/
 
-    public max: { action: number; other: Array<BSActionAmount>; };
+    public max: { action: number; other: Array<BSActionAmount>; } = { action: 1, other: [] };
     public ships: Array<BSShipAmount> = [];
-    public boards: BSMapBoardRegistry;
-    public dimensions: BSDimensions;
+    public boards: BSMapBoardRegistry = {};
 
     /**********************************************************************************/
     /*                                                                                */
@@ -24,14 +23,7 @@ class Map {
     /*                                                                                */
     /**********************************************************************************/
 
-    constructor (dimensions: BSDimensions) {
-        this.dimensions = dimensions;
-        this.boards = {};
-        this.max = {
-            action: 1,
-            other: []
-        };
-    }
+    constructor (public dimensions: BSDimensions) {}
 
     /**********************************************************************************/
     /*                                                                                */
@@ -41,7 +33,7 @@ class Map {
 
     public setActionsLimit (action: number, other?: Array<BSActionAmount>) {
         this.max.action = action;
-        if (_utils.isDefined(other)) {
+        if (_utils.isArray(other)) {
             this.max.other = other;
         }
     }
@@ -51,7 +43,6 @@ class Map {
     }
 
     public setShipDisposition (playerId: string, ships: Array<Ship>) {
-
         if (_utils.isUndefined(this.boards[playerId])) {
             this.boards[playerId] = {};
         }
@@ -93,11 +84,10 @@ class Map {
             });
 
             _utils.forEach(ships, (ship: Ship) => {
-                let type = ship.type();
-                if (_utils.isUndefined(check[type])) {
+                if (_utils.isUndefined(check[ship.type])) {
                     throw new Error();
                 }
-                check[type].result += 1;
+                check[ship.type].result += 1;
             });
 
             _utils.forEach(check, element => {

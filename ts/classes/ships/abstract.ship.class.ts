@@ -5,7 +5,7 @@ import BSData = require("../../definitions/bsdata");
 
 let _utils: Utils = new Utils();
 
-class Ship {
+abstract class Ship {
 
     /**********************************************************************************/
     /*                                                                                */
@@ -14,14 +14,10 @@ class Ship {
     /**********************************************************************************/
 
     public hits: Array<BSCoordinates> = [];
-    public coord: BSCoordinates;
-    public size: number;
+    public coord: BSCoordinates = null;
     public bs_uuid: string = _utils.uuid();
     public destroyed: boolean = false;
-    public horizontal: boolean = true;
-    public dimensions: BSDimensions;
-
-    private _type: string = "UNDEFINED";
+    public dimensions: BSDimensions = null;
 
     /**********************************************************************************/
     /*                                                                                */
@@ -29,10 +25,8 @@ class Ship {
     /*                                                                                */
     /**********************************************************************************/
 
-    constructor(type: string, size: number, x: number = 0, y: number = 0, horizontal: boolean = true) {
+    constructor(private _type: string, public size: number, x: number = 0, y: number = 0, public horizontal: boolean = true) {
         this.coord = {x : x, y : y};
-        this._type = type;
-        this.size = size;
         this.dimensions = {
             x : horizontal ? this.size : 1,
             y : horizontal ? 1 : this.size
@@ -41,21 +35,29 @@ class Ship {
 
     /**********************************************************************************/
     /*                                                                                */
-    /*                                PUBLIC MEMBERS                                  */
+    /*                                   ACCESSORS                                    */
     /*                                                                                */
     /**********************************************************************************/
 
-    public health = (): number => {
+    public get health(): number {
         return this.size - this.hits.length;
     };
 
-    public type = (_type?: string): string =>  {
-        if (_utils.isUndefined(_type)) {
-            return this._type;
-        }
-        this._type = _type;
+    public get type(): string {
         return this._type;
     };
+
+    public set type(type: string) {
+        if (_utils.isString(type) && type.trim().length > 0) {
+            this._type = type;
+        }
+    };
+
+    /**********************************************************************************/
+    /*                                                                                */
+    /*                                PUBLIC MEMBERS                                  */
+    /*                                                                                */
+    /**********************************************************************************/
 
     public isAffectedByAction = (action: BSAction): boolean | BSCoordinates => {
         if (this.destroyed) {
@@ -82,7 +84,7 @@ class Ship {
         return false;
     };
 
-    public overlapping = (ship: Ship): boolean => {
+    public isOverlapping = (ship: Ship): boolean => {
         return this.coord.x + this.dimensions.x > ship.coord.x
             && this.coord.x < ship.coord.x + ship.dimensions.x
             && this.coord.y + this.dimensions.y > ship.coord.y

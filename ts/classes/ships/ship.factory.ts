@@ -6,10 +6,10 @@ let _utils: Utils = new Utils();
 
 import Ship = require("./abstract.ship.class");
 import ShipCarrier = require("./ship.carrier.class");
-import ShipBattleship = require("./ship.battleship.class");
 import ShipCruiser = require("./ship.cruiser.class");
 import ShipSubmarine = require("./ship.submarine.class");
 import ShipDestroyer = require("./ship.destroyer.class");
+import ShipBattleship = require("./ship.battleship.class");
 
 class ShipFactory {
 
@@ -38,9 +38,10 @@ class ShipFactory {
             case "DESTROYER":
                 return new ShipDestroyer(x, y, horizontal);
             default:
-                throw new Error();
+                throw new Error("Unknown ship: " + bs_ship.type);
         }
     };
+
 }
 
 export = ShipFactory;

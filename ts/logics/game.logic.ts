@@ -145,7 +145,7 @@ function _noShipsAreOverlapping(ships: Array<Ship>): boolean {
         _utils.forEach(ships, (shipA: Ship) => {
             _utils.forEach(ships, (shipB: Ship) => {
                 if (shipA.bs_uuid === shipB.bs_uuid) return;
-                if (shipA.overlapping(shipB)) throw new Error();
+                if (shipA.isOverlapping(shipB)) throw new Error();
             });
         });
     } catch (exception) { return false; }

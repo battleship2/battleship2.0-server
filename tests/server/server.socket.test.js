@@ -1,6 +1,5 @@
 var expect = require('chai').expect,
     restify = require('restify'),
-    SocketClass = require('../../src/release/classes/socket.class'),
     ServerClass = require('../../src/release/classes/server.class'),
     ioClient = require('socket.io-client');
 
@@ -8,7 +7,7 @@ require('events').EventEmitter.prototype._maxListeners = 100;
 
 describe('server.socket:', function () {
 
-    var server, socket,
+    var server,
         clientA, clientB, clientC,
         port = 9000,
         url = 'http://localhost:' + port;
@@ -21,11 +20,7 @@ describe('server.socket:', function () {
 
     beforeEach(function (done) {
         server = new ServerClass();
-        socket = new SocketClass();
-        socket.reset();
-
-        socket.init(server.get());
-        server.start(port);
+        server.setup().start(port);
 
         clientA = ioClient(url);
         clientB = ioClient(url);

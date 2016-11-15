@@ -9,7 +9,7 @@ describe('server.game:', function () {
 
     describe('[Player trying to join]', function () {
         beforeEach(function (done) {
-            game = new Game(1, 'test', 5);
+            game = new Game('test', 5);
             mockPlayer = {
                 id: 'toto',
                 nickname: 'testing dude',
@@ -34,13 +34,13 @@ describe('server.game:', function () {
         });
 
         it('should refuse a player if the state of the game is not WAITING_PLAYERS', function () {
-            game.state(bsdata.State.WAITING_PLAYERS);
+            game.state = bsdata.State.WAITING_PLAYERS;
             var result = game.acceptPlayer(mockPlayer, {});
             expect(result).to.be.true;
-            game.state(bsdata.State.READY);
+            game.state = bsdata.State.READY;
             result = game.acceptPlayer(mockPlayer, {});
             expect(result).to.be.false;
-            game.state(bsdata.State.STARTED);
+            game.state = bsdata.State.STARTED;
             result = game.acceptPlayer(mockPlayer, {});
             expect(result).to.be.false;
         });
@@ -81,7 +81,7 @@ describe('server.game:', function () {
 
         it('should set the game property of the player when he is joining', function () {
             game.addPlayer(mockPlayer);
-            expect(mockPlayer).to.have.property('game').to.equal(game.getId());
+            expect(mockPlayer).to.have.property('game').to.have.property('id').to.equal(game.id);
             expect(Object.keys(game.players)).to.have.length(1);
             expect(game.players).to.have.property(mockPlayer.bs_uuid);
         });
@@ -92,19 +92,17 @@ describe('server.game:', function () {
             game.addPlayer(mockPlayer);
             var result = mockPlayer.join.calledWith(game.socketRoomName);
             expect(result).to.be.true;
-            result = mockPlayer.leave.calledWith('lobby');
-            expect(result).to.be.true;
         });
 
         it('should set the state of the game to READY when the number of player is reached', function () {
             game = new Game('2 players', 2);
-            expect(game.state()).to.equal(bsdata.State.WAITING_PLAYERS);
+            expect(game.state).to.equal(bsdata.State.WAITING_PLAYERS);
             game.players = {
                 'dupont': {}
             };
             mockPlayer.nickname = 'dupond';
             game.addPlayer(mockPlayer);
-            expect(game.state()).to.equal(bsdata.State.READY);
+            expect(game.state).to.equal(bsdata.State.READY);
         });
 
         it('should set the state of the game to SETTING when every players are ready', function () {
@@ -113,10 +111,10 @@ describe('server.game:', function () {
                 'Sonic': { isReady: true },
                 'Tails': { isReady: false }
             };
-            game.state(bsdata.State.READY);
+            game.state = bsdata.State.READY;
             mockPlayer.bs_uuid = 'Tails';
             game.setPlayerReady(mockPlayer, true);
-            expect(game.state()).to.equal(bsdata.State.SETTING);
+            expect(game.state).to.equal(bsdata.State.SETTING);
             expect(game.players['Sonic']).to.have.property('isReady').to.equal(true);
             expect(game.players['Tails']).to.have.property('isReady').to.equal(true);
         });
@@ -135,7 +133,7 @@ describe('server.game:', function () {
             };
         });
 
-        it('should make the player leave the room when he leave', function () {
+        it('should make the player leave the room when he leaves', function () {
             mockPlayer.join = sinon.spy();
             mockPlayer.leave = sinon.spy();
             mockPlayer.nickname = 'party pooper';
@@ -143,8 +141,6 @@ describe('server.game:', function () {
                 'party pooper': {}
             };
             game.removePlayer(mockPlayer);
-            var result = mockPlayer.join.calledWith('lobby');
-            expect(result).to.be.true;
             result = mockPlayer.leave.calledWith(game.socketRoomName);
             expect(result).to.be.true;
         });
@@ -156,9 +152,9 @@ describe('server.game:', function () {
                 'blanca': {},
                 'pac-man': mockPlayer
             };
-            game.state(bsdata.State.READY);
+            game.state = bsdata.State.READY;
             game.removePlayer(mockPlayer);
-            expect(game.state()).to.equal(bsdata.State.WAITING_PLAYERS);
+            expect(game.state).to.equal(bsdata.State.WAITING_PLAYERS);
             expect(game.players).to.not.have.property('pac-man');
         });
 
@@ -170,9 +166,9 @@ describe('server.game:', function () {
                 'Peach': {},
                 'Luidgi': {}
             };
-            game.state(bsdata.State.PLAYING);
+            game.state = bsdata.State.PLAYING;
             game.removePlayer(mockPlayer);
-            expect(game.state()).to.equal(bsdata.State.PLAYING);
+            expect(game.state).to.equal(bsdata.State.PLAYING);
             expect(game.players).to.not.have.property('Mario');
         });
     });

@@ -72,6 +72,7 @@ function _mkdirp(done) {
 function _ts() {
     var tsResult = gulp.src(paths.ts)
         .pipe(ts({
+            target: 'ES5',
             module: 'commonjs',
             declaration: true,
             removeComments: false,

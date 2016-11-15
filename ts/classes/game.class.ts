@@ -3,10 +3,12 @@
 import Map = require("./map.class");
 import Ship = require("./ships/abstract.ship.class");
 import Utils = require("../services/utils.service");
+import Socket = require("./socket.class");
 import BSData = require("../definitions/bsdata");
 import GameLogic = require("../logics/game.logic");
 
 let _utils: Utils = new Utils();
+let _games: { [bs_uuid: string]: Game } = {};
 
 class Game {
 
@@ -16,19 +18,17 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public map: Map;
-    public name: string = "";
+    public map: Map = new Map({x: 10, y: 10});
     public logic: GameLogic = new GameLogic();
     public players: BSPlayerRegistry = {};
     public actions: BSActionRegistry = {};
     public history: Array<BSActionRegistry> = [];
-    public password: string = "";
-    public maxPlayers: number = 4;
     public socketRoomName: string = "UNNAMED";
 
-    private _id: string = _utils.uuid();
     private _state: number = BSData.State.WAITING_PLAYERS;
     private _peopleWriting: { [peopleId: string]: People } = {};
+
+    readonly _bs_uuid: string = _utils.uuid();
 
     /**********************************************************************************/
     /*                                                                                */
@@ -36,15 +36,53 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    constructor(name: string, maxPlayers: number, password: string = "") {
-        this.map = new Map({x: 10, y: 10});
-        this.map.setActionsLimit(1, []);
-        this.map.setShips([{type: BSData.ShipType.DESTROYER, amount: 1}]);
-        this.name = name;
-        this.password = password;
-        this.maxPlayers = maxPlayers >= 2 && maxPlayers <= 10 ? maxPlayers : 4;
-        this.socketRoomName = "/game/" + this._id + "-" + this.name;
+    constructor(public name: string, public maxPlayers: number = 4, public password: string = "") {
+        this.socketRoomName = "/game/" + this._bs_uuid + "-" + this.name;
+
+        _games[this._bs_uuid] = this;
     }
+
+    /**********************************************************************************/
+    /*                                                                                */
+    /*                                   ACCESSORS                                    */
+    /*                                                                                */
+    /**********************************************************************************/
+
+    public static get games(): { [bs_uuid: string]: Game } {
+        return _games;
+    };
+
+    public get id(): string {
+        return this._bs_uuid;
+    };
+
+    public get playersCount(): number {
+        return this.playersList.length;
+    };
+
+    public get playersList(): Array<string> {
+        return Object.keys(this.players);
+    };
+
+    public get state(): number {
+        return this._state;
+    };
+
+    public set state(state: number) {
+        if (_utils.isNumber(state)) {
+            this._state = state;
+        }
+    };
+
+    /**********************************************************************************/
+    /*                                                                                */
+    /*                                STATIC MEMBERS                                  */
+    /*                                                                                */
+    /**********************************************************************************/
+
+    public static stopAll = (): void => {
+        _utils.forEach(_games, (_game: Game) => _game.stop());
+    };
 
     /**********************************************************************************/
     /*                                                                                */
@@ -52,7 +90,13 @@ class Game {
     /*                                                                                */
     /**********************************************************************************/
 
-    public handlePeopleWriting = (io: SocketIO.Server, status: string, socket: SocketIO.Socket) : Game => {
+    public stop = () : Game => {
+        this.removeAllPlayers();
+        delete _games[this._bs_uuid];
+        return this;
+    };
+
+    public handlePeopleWriting = (status: string, socket: Socket) : { [peopleId: string]: People } => {
         switch (status) {
             case "STOPPED_WRITING":
                 if (_utils.isDefined(this._peopleWriting[socket.bs_uuid])) {
@@ -67,24 +111,10 @@ class Game {
                         nickname: socket.nickname
                     };
                 }
+                break;
         }
 
-        io.sockets.in(this.socketRoomName).emit(BSData.events.emit.PEOPLE_WRITING, this._peopleWriting);
-
-        return this;
-    };
-
-    public state = (__state?: number) : number => {
-        if (_utils.isUndefined(__state)) {
-            return this._state;
-        }
-
-        this._state = __state;
-        return this._state;
-    };
-
-    public getId = () : string => {
-        return this._id;
+        return this._peopleWriting;
     };
 
     public hasEveryonePlayedTheTurn = () : boolean => {
@@ -100,11 +130,11 @@ class Game {
     };
 
     public isOpen = () : boolean => {
-        return this.state() === BSData.State.WAITING_PLAYERS && _hasAvailableSlot.call(this);
+        return this.state === BSData.State.WAITING_PLAYERS && _hasAvailableSlot.call(this);
     };
 
     public isStillPlayable = () : boolean => {
-        return this.countPlayers() >= 2;
+        return this.playersCount >= 2;
     };
 
     public emit = (io: SocketIO.Server, event: string, data?: any) : Game => {
@@ -114,14 +144,6 @@ class Game {
             io.sockets.in(this.socketRoomName).emit(event, data);
         }
         return this;
-    };
-
-    public countPlayers = () : number => {
-        return this.getPlayersList().length;
-    };
-
-    public getPlayersList = () : Array<string> => {
-        return Object.keys(this.players);
     };
 
     public playTheTurn = () : BSTurn => {
@@ -157,14 +179,14 @@ class Game {
 
             _utils.forEach(board.ships, (ship: Ship) => {
                 playerInfo.maxHealth += ship.size;
-                playerInfo.health += ship.health();
+                playerInfo.health += ship.health;
             });
             infos.push(playerInfo);
         });
         return infos;
     };
 
-    public setNextActions = (socket: SocketIO.Socket, actions: Array<BSAction>) : boolean => {
+    public setNextActions = (socket: Socket, actions: Array<BSAction>) : boolean => {
         if (!this.logic.isActionsValid(this.map, actions)) {
             return false;
         }
@@ -180,15 +202,15 @@ class Game {
         return true;
     };
 
-    public setPlayerReady = (socket: SocketIO.Socket, isReady: boolean) : Game => {
-        if (_hasPlayer.call(this, socket) && this.state() === BSData.State.READY) {
+    public setPlayerReady = (socket: Socket, isReady: boolean) : Game => {
+        if (_hasPlayer.call(this, socket) && this.state === BSData.State.READY) {
             this.players[socket.bs_uuid].isReady = isReady;
             _updateState.call(this);
         }
         return this;
     };
 
-    public placePlayerShips = (socket: SocketIO.Socket, ships: Array<Ship>) : boolean => {
+    public placePlayerShips = (socket: Socket, ships: Array<Ship>) : boolean => {
         if (this.logic.isDispositionValid(this.map, ships)) {
             this.map.setShipDisposition(socket.bs_uuid, ships);
 
@@ -207,9 +229,9 @@ class Game {
         return false;
     };
 
-    public acceptPlayer = (socket: SocketIO.Socket, data: BSGameData) : boolean => {
+    public acceptPlayer = (socket: Socket, data: BSGameData) : boolean => {
         return _utils.isNull(socket.game) &&
-            this.state() === BSData.State.WAITING_PLAYERS &&
+            this.state === BSData.State.WAITING_PLAYERS &&
             _hasAvailableSlot.call(this) &&
             _passwordIsCorrect.call(this, data) &&
             !_hasPlayer.call(this, socket);
@@ -217,41 +239,43 @@ class Game {
 
     public summary = () : BSGameSummary => {
         return <BSGameSummary>{
-            id: this._id,
+            id: this._bs_uuid,
             name: this.name,
-            players: this.countPlayers(),
+            players: this.playersCount,
             password: _utils.isString(this.password) && this.password.length > 0,
             maxPlayers: this.maxPlayers
         };
     };
 
-    public addPlayer = (socket: SocketIO.Socket) : Game => {
+    public addPlayer = (socket: Socket) : Game => {
         this.players[socket.bs_uuid] = {
             score: 0,
+            socket: socket,
             isReady: false,
             nickname: socket.nickname
         };
         socket.join(this.socketRoomName);
-        socket.leave("lobby");
-        socket.game = this._id;
+        socket.game = this;
         _updateState.call(this);
         return this;
     };
 
-    public removePlayer = (socket: SocketIO.Socket) : Game => {
-        socket.join("lobby");
+    public removePlayer = (socket: Socket) : Game => {
         socket.leave(this.socketRoomName);
-        socket.game = null;
         delete this.players[socket.bs_uuid];
         _updateState.call(this);
         return this;
     };
 
-    public removeAllPlayers = (sockets: BSSocketRegistry) : Game => {
-        let self = this;
-        _utils.forEach(sockets, (socket: SocketIO.Socket) => {
-            self.removePlayer(socket);
+    public removeAllPlayers = () : Game => {
+        _utils.forEach(this.players, (player: BSPlayer, index: string) => {
+            if (_utils.isDefined(player.socket)) {
+                player.socket.leave(this.socketRoomName);
+            }
+            delete this.players[index];
         });
+        this.players = {};
+        _updateState.call(this);
         return this;
     };
 
@@ -289,12 +313,12 @@ function _passwordIsCorrect(data: BSGameData): boolean {
     return true;
 }
 
-function _hasPlayer(socket: SocketIO.Socket): boolean {
+function _hasPlayer(socket: Socket): boolean {
     return socket.bs_uuid in this.players;
 }
 
 function _hasAvailableSlot(): boolean {
-    return this.countPlayers() < this.maxPlayers;
+    return this.playersCount < this.maxPlayers;
 }
 
 function _areAllPlayersReady(): boolean {
