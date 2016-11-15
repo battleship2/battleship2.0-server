@@ -62,7 +62,9 @@ function _typedoc() {
             out: 'docs/',
             name: 'battleship2.0-server',
             module: 'commonjs',
-            target: 'es5'
+            target: 'es5',
+            hideGenerator: true,
+            includeDeclarations: true
         }));
 }
 
