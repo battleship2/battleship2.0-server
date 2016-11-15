@@ -21,6 +21,8 @@ var uglify = require('gulp-uglify');
 var tslint = require('gulp-tslint');
 var nodemon = require('gulp-nodemon');
 
+var typedoc = require("gulp-typedoc");
+
 var paths = {
     ts: ['ts/**/*.ts'],
     js: ['src/release/**/*.js'],
@@ -47,11 +49,24 @@ gulp.task('minify', gulp.series('hook', _minify));
 gulp.task('build', gulp.series('scratch', 'minify', 'zip'));
 gulp.task('default', gulp.series('scratch', 'serve'));
 
+gulp.task('typedoc', gulp.series(_typedoc));
+
 /**********************************************************************************/
 /*                                                                                */
 /*                                     HOOKS                                      */
 /*                                                                                */
 /**********************************************************************************/
+
+function _typedoc() {
+    return gulp
+        .src(paths.ts)
+        .pipe(typedoc({
+            module: "commonjs",
+            target: "es5",
+            out: "docs/",
+            name: "battleship2.0-server"
+        }));
+}
 
 function _tslint() {
     return gulp.src(paths.ts)
