@@ -20,8 +20,7 @@ var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var tslint = require('gulp-tslint');
 var nodemon = require('gulp-nodemon');
-
-var typedoc = require("gulp-typedoc");
+var typedoc = require('gulp-typedoc');
 
 var paths = {
     ts: ['ts/**/*.ts'],
@@ -39,6 +38,7 @@ gulp.task('zip', gulp.series(_zip));
 gulp.task('mkdirp', gulp.series(_mkdirp));
 gulp.task('tslint', gulp.series(_tslint));
 gulp.task('scratch', gulp.series(_scratch));
+gulp.task('typedoc', gulp.series(_typedoc));
 
 gulp.task('ts', gulp.series('tslint', _ts));
 gulp.task('hook', gulp.series('ts', _hook));
@@ -48,8 +48,6 @@ gulp.task('minify', gulp.series('hook', _minify));
 
 gulp.task('build', gulp.series('scratch', 'minify', 'zip'));
 gulp.task('default', gulp.series('scratch', 'serve'));
-
-gulp.task('typedoc', gulp.series(_typedoc));
 
 /**********************************************************************************/
 /*                                                                                */
@@ -61,10 +59,10 @@ function _typedoc() {
     return gulp
         .src(paths.ts)
         .pipe(typedoc({
-            module: "commonjs",
-            target: "es5",
-            out: "docs/",
-            name: "battleship2.0-server"
+            out: 'docs/',
+            name: 'battleship2.0-server',
+            module: 'commonjs',
+            target: 'es5'
         }));
 }
 
