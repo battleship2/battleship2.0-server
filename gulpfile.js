@@ -64,6 +64,7 @@ function _typedoc() {
             module: 'commonjs',
             target: 'es5',
             hideGenerator: true,
+            excludeExternals: true,
             includeDeclarations: true
         }));
 }
