@@ -130,11 +130,15 @@ class Socket {
         return this;
     };
 
-    public peopleInSameRoom = (): { [id: string]: People } => {
+    public peopleInSameRoom = (socketToOmit?: string): { [id: string]: People } => {
         let people = {};
         let siblings = Socket.findIn(this._room);
 
         _utils.forEach(siblings, (socket: Socket) => {
+            if (socket.bs_uuid === socketToOmit) {
+                return;
+            }
+
             people[socket.bs_uuid] = {
                 id: socket.bs_uuid,
                 nickname: socket.nickname
@@ -159,7 +163,7 @@ class Socket {
         _utils.forEach(this._plugins, (plugin: BSPlugin) => plugin.stop());
 
         this.dispatch(BSData.events.emit.LEFT_ROOM, { id: this._bs_uuid, nickname: this._nickname });
-        this.dispatch(BSData.events.emit.PEOPLE_IN_ROOM, this.peopleInSameRoom());
+        this.dispatch(BSData.events.emit.PEOPLE_IN_ROOM, this.peopleInSameRoom(this._bs_uuid));
 
         if (!_utils.isNull(this._game)) {
             this._game.removePlayer(this);
